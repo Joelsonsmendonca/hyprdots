@@ -5,4 +5,11 @@
 # NVIDIA. Sem isso, o Hyprland abre /dev/nvidia* e a dGPU nunca entra em
 # runtime suspend, mesmo parada (~9W extras o tempo todo — ver README).
 # Apps que precisam da dGPU: use o wrapper `nvidia-offload <comando>`.
-export AQ_DRM_DEVICES=/dev/dri/by-path/pci-0000:05:00.0-card
+#
+# AQ_DRM_DEVICES é uma lista separada por ":", e o nome do symlink em
+# /dev/dri/by-path/ já contém ":" (ex.: pci-0000:05:00.0-card), o que faz o
+# Aquamarine partir o próprio caminho em pedaços e não achar nenhuma GPU
+# (erro "Found no gpus to use, cannot continue"). Por isso resolvemos o
+# symlink aqui com readlink -f antes de exportar, virando algo sem ":"
+# (ex.: /dev/dri/card1).
+export AQ_DRM_DEVICES=$(readlink -f /dev/dri/by-path/pci-0000:05:00.0-card)
