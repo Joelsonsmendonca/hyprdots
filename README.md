@@ -15,11 +15,9 @@ Configurações pessoais de desktop para [Hyprland](https://hyprland.org/), incl
 ### Destaques
 
 - Config do Hyprland em **Lua** (`hyprland.lua`), usando o suporte nativo do `hyprlang` — binds, monitores, regras de janela e autostart tudo num lugar só.
-- Popup de atalhos (`SUPER + tecla` na Waybar) que lê `common/hypr/config/keybinds.conf` e monta a lista dinamicamente via `wofi` — não é uma lista hardcoded.
+- Popup de atalhos (`SUPER + tecla` na Waybar) que lê os `hl.bind(...)` direto do `hyprland.lua` e monta a lista dinamicamente via `wofi` — **fonte única de verdade**, sem lista duplicada para manter sincronizada.
 - Menu de energia (`common/hypr/scripts/power-menu.sh`) e screenshot para a área de transferência (`screenshot_clipboard.sh`, via `grim` + `slurp` + `wl-copy`).
 - Tema consistente entre Waybar / Wofi / popup de atalhos, usando `JetBrainsMono Nerd Font Mono`.
-
-> **Nota:** os binds "de verdade" ficam em `hyprland.lua` (seção `KEYBINDINGS`). O arquivo `config/keybinds.conf` é usado só pelo `show-keybinds.sh` para gerar o popup visual — se você mudar um bind no `.lua`, espelhe a mudança nesse arquivo também para o popup continuar correto.
 
 ## Pré-requisitos
 
@@ -27,11 +25,14 @@ Testado em Arch Linux. Pacotes necessários:
 
 ```bash
 sudo pacman -S hyprland waybar kitty wofi grim slurp wl-clipboard \
-    brightnessctl wireplumber pavucontrol dolphin btop ttf-jetbrains-mono-nerd
+    brightnessctl wireplumber pavucontrol dolphin btop ttf-jetbrains-mono-nerd \
+    python playerctl
 
 # rofi com suporte a Wayland
 sudo pacman -S rofi-wayland
 ```
+
+`python` é usado pelo `show-keybinds.sh` (o popup de atalhos lê os binds direto do `hyprland.lua`).
 
 Apps referenciados nos binds que não vêm do repositório oficial (instale via AUR com `yay`/`paru` se quiser tudo funcionando, ou ajuste os binds em `hyprland.lua`):
 
@@ -72,9 +73,8 @@ yay -S visual-studio-code-bin vesktop-bin brave-bin
 ```
 common/
 ├── hypr/
-│   ├── hyprland.lua          # config principal do Hyprland
-│   ├── config/keybinds.conf  # fonte para o popup de atalhos
-│   └── scripts/              # power-menu, screenshot, popup de atalhos
+│   ├── hyprland.lua          # config principal do Hyprland (única fonte dos binds)
+│   └── scripts/              # power-menu, screenshot, popup de atalhos (lê hyprland.lua)
 ├── kitty/kitty.conf
 ├── rofi/config.rasi
 ├── waybar/
