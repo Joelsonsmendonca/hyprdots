@@ -1,0 +1,8 @@
+# Sourced pelo UWSM antes de iniciar o Hyprland (ver `uwsm/README.md`, seção
+# "Environment").
+#
+# Força o Aquamarine a renderizar o desktop na iGPU AMD em vez da dGPU
+# NVIDIA. Sem isso, o Hyprland abre /dev/nvidia* e a dGPU nunca entra em
+# runtime suspend, mesmo parada (~9W extras o tempo todo — ver README).
+# Apps que precisam da dGPU: use o wrapper `nvidia-offload <comando>`.
+export AQ_DRM_DEVICES=/dev/dri/by-path/pci-0000:05:00.0-card
