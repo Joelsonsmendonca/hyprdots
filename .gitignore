@@ -1,0 +1,4 @@
+_preexisting_backup_*/
+*.swp
+*.bak
+.DS_Store

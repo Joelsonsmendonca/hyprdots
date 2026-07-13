@@ -1,0 +1,94 @@
+* {
+    font-family: "JetBrainsMono Nerd Font Mono", sans-serif;
+    font-size: 13px;
+}
+
+window#waybar {
+    background-color: rgba(26, 27, 38, 0.9);
+    color: #c0caf5;
+    border-radius: 10px;
+}
+
+#clock,
+#battery,
+#tray,
+#custom-keybinds,
+#custom-power,
+#idle_inhibitor,
+#pulseaudio,
+#bluetooth,
+#backlight,
+#cpu,
+#memory {
+    padding: 0 10px;
+    margin: 4px 2px;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    color: #c0caf5;
+}
+
+#workspaces button.active {
+    background-color: #414868;
+    border-radius: 8px;
+    color: #7aa2f7;
+}
+
+#workspaces button:hover {
+    background-color: rgba(65, 72, 104, 0.5);
+    border-radius: 8px;
+}
+
+#workspaces button.urgent {
+    color: #f7768e;
+}
+
+#window {
+    color: #a9b1d6;
+    font-style: italic;
+}
+
+#custom-keybinds {
+    color: #e0af68;
+    font-weight: bold;
+}
+
+#custom-keybinds:hover {
+    background-color: rgba(65, 72, 104, 0.4);
+    border-radius: 8px;
+}
+
+#custom-power {
+    color: #f7768e;
+}
+
+#custom-power:hover {
+    background-color: rgba(247, 118, 142, 0.2);
+    border-radius: 8px;
+}
+
+#idle_inhibitor.activated {
+    color: #e0af68;
+}
+
+#pulseaudio.muted {
+    color: #565f89;
+}
+
+#bluetooth.off,
+#bluetooth.disabled {
+    color: #565f89;
+}
+
+#battery.warning {
+    color: #e0af68;
+}
+
+#battery.critical {
+    color: #f7768e;
+}
+
+#battery.charging {
+    color: #9ece6a;
+}
