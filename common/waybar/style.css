@@ -16,7 +16,6 @@ window#waybar {
 #custom-power,
 #idle_inhibitor,
 #pulseaudio,
-#bluetooth,
 #backlight,
 #cpu,
 #memory {
@@ -73,11 +72,6 @@ window#waybar {
 }
 
 #pulseaudio.muted {
-    color: #565f89;
-}
-
-#bluetooth.off,
-#bluetooth.disabled {
     color: #565f89;
 }
 

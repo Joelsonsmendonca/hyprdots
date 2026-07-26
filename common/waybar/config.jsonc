@@ -17,12 +17,12 @@
     ],
 
     // Módulos da Direita
-    // battery, backlight e bluetooth somem sozinhos se o hardware nao existir
+    // battery e backlight somem sozinhos se o hardware nao existir
     // (comportamento nativo do waybar) -- por isso o mesmo arquivo serve pro PC e pro notebook
+    // bluetooth agora é o ícone do blueman-applet na tray (igual o nm-applet faz pro wifi)
     "modules-right": [
         "custom/keybinds",
         "idle_inhibitor",
-        "bluetooth",
         "backlight",
         "cpu",
         "memory",
@@ -69,18 +69,6 @@
             "deactivated": ""
         },
         "tooltip": true
-    },
-
-    "bluetooth": {
-        "format": " {status}",
-        "format-connected": " {device_alias}",
-        "format-connected-battery": " {device_alias} {device_battery_percentage}%",
-        "format-off": " Desligado",
-        "format-disabled": " Desativado",
-        "tooltip-format": "{controller_alias}\t{controller_address}",
-        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
-        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
-        "on-click": "rfkill toggle bluetooth"
     },
 
     "backlight": {
