@@ -10,7 +10,8 @@ Configurações pessoais de desktop para [Hyprland](https://hyprland.org/), incl
 | [Waybar](https://github.com/Alexays/Waybar) | Barra de status | `common/waybar/` |
 | [Kitty](https://sw.kovidgoyal.io/kitty/) | Terminal | `common/kitty/kitty.conf` |
 | [Rofi](https://github.com/davatorium/rofi) | Launcher | `common/rofi/config.rasi` |
-| [Wofi](https://hg.sr.ht/~scoopta/wofi) | Menu/dmenu (drun, energia, atalhos) | `common/wofi/` |
+| [Fuzzel](https://codeberg.org/dnkl/fuzzel) | Launcher de apps (`SUPER + Space`) | `common/fuzzel/fuzzel.ini` |
+| [Wofi](https://hg.sr.ht/~scoopta/wofi) | Menu/dmenu (energia, popup de atalhos) | `common/wofi/` |
 | [UWSM](https://github.com/Vladimir-csp/uwsm) | Environment do Hyprland (variáveis pré-login) | `common/uwsm/env-hyprland` |
 
 ### Destaques
@@ -56,7 +57,7 @@ O wrapper (`common/hypr/scripts/nvidia-offload.sh`, symlinkado em `~/.local/bin/
 Testado em Arch Linux. Pacotes necessários:
 
 ```bash
-sudo pacman -S hyprland uwsm waybar kitty wofi grim slurp wl-clipboard \
+sudo pacman -S hyprland uwsm waybar kitty wofi fuzzel grim slurp wl-clipboard \
     brightnessctl wireplumber pavucontrol dolphin btop ttf-jetbrains-mono-nerd \
     python playerctl power-profiles-daemon
 
@@ -83,7 +84,7 @@ yay -S visual-studio-code-bin vesktop-bin brave-bin
 2. Faça backup de configs existentes (se já tiver algo em `~/.config`):
 
    ```bash
-   for app in hypr kitty rofi waybar wofi uwsm; do
+   for app in hypr kitty rofi waybar wofi fuzzel uwsm; do
        [ -e "$HOME/.config/$app" ] && [ ! -L "$HOME/.config/$app" ] && \
            mv "$HOME/.config/$app" "$HOME/.config/${app}.bak"
    done
@@ -93,7 +94,7 @@ yay -S visual-studio-code-bin vesktop-bin brave-bin
 
    ```bash
    mkdir -p ~/.config
-   for app in hypr kitty rofi waybar wofi uwsm; do
+   for app in hypr kitty rofi waybar wofi fuzzel uwsm; do
        ln -sfn "$HOME/dotfiles/common/$app" "$HOME/.config/$app"
    done
    ```
@@ -118,6 +119,7 @@ common/
 │   └── scripts/              # power-menu, screenshot, popup de atalhos, nvidia-offload
 ├── kitty/kitty.conf
 ├── rofi/config.rasi
+├── fuzzel/fuzzel.ini          # launcher de apps (SUPER + Space)
 ├── uwsm/
 │   └── env-hyprland          # variáveis pré-login (ex.: qual GPU o Hyprland usa)
 ├── waybar/

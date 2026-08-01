@@ -284,7 +284,7 @@ hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("vesktop"))
 hl.bind(mainMod .. " + N",      hl.dsp.exec_cmd("code"))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("brave"))
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("kitty -e btop"))
-hl.bind(mainMod .. " + space",  hl.dsp.exec_cmd("wofi --show drun --allow-images"))
+hl.bind(mainMod .. " + space",  hl.dsp.exec_cmd("fuzzel"))
 hl.bind("PRINT", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/screenshot_clipboard.sh"))
 hl.bind("ALT + TAB", hl.dsp.window.cycle_next())
 
