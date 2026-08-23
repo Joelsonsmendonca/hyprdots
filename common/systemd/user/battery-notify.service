@@ -1,0 +1,6 @@
+[Unit]
+Description=Verifica nível de bateria e notifica se estiver baixa/crítica
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/hypr/scripts/battery-notify.sh
