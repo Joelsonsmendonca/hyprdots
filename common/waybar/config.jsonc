@@ -28,6 +28,7 @@
         "memory",
         "battery",
         "pulseaudio",
+        "custom/notification",
         "tray",
         "custom/power"
     ],
@@ -121,6 +122,24 @@
         "format": "",
         "tooltip-format": "Ver atalhos do Hyprland",
         "on-click": "~/.config/hypr/scripts/show-keybinds.sh"
+    },
+
+    "custom/notification": {
+        "tooltip": true,
+        "tooltip-format": "Notificações (clique pra abrir o painel)",
+        "format": "{icon}",
+        "format-icons": {
+            "notification": "<span foreground='#f7768e'><sup></sup></span>",
+            "none": "",
+            "dnd-notification": "<span foreground='#f7768e'><sup></sup></span>",
+            "dnd-none": ""
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
     },
 
     "custom/power": {

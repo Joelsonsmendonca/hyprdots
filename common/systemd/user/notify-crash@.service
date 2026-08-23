@@ -1,0 +1,6 @@
+[Unit]
+Description=Notifica na tela quando um app de autostart crasha (%I)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/notify-send -u critical -a "systemd" "App de autostart crashou" "%I não vai voltar sozinho a menos que tenha Restart= configurado.\nDetalhes: systemctl --user status '%i@autostart.service'"

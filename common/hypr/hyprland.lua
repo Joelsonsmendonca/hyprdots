@@ -26,7 +26,7 @@ hl.monitor({
     output   = "",
     mode     = "preferred",
     position = "auto",
-    scale    = "auto",
+    scale    = 1.0,
 })
 
 
@@ -57,6 +57,7 @@ local menu        = "wofi --show drun"
 
 hl.on("hyprland.start", function ()
   hl.exec_cmd("waybar")
+  hl.exec_cmd("swaync")
 end)
 
 
@@ -274,6 +275,30 @@ hl.bind(mainMod .. " + greater", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/power-menu.sh"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+
+-- Modo PIP: flutua + encolhe pro canto (chamada de vídeo enquanto usa outras janelas).
+-- SUPER+V só flutua e mantém o tamanho do tile, o que parece um tile flutuante; isso aqui
+-- também redimensiona e posiciona no canto. Aperta de novo pra voltar a tiled.
+hl.bind(mainMod .. " + F", function()
+    local win = hl.get_active_window()
+    if not win then return end
+
+    if win.floating then
+        hl.dispatch(hl.dsp.window.float({ action = "off" }))
+    else
+        hl.dispatch(hl.dsp.window.float({ action = "on" }))
+        hl.dispatch(hl.dsp.window.resize({ x = 420, y = 260 }))
+
+        local mon = hl.get_active_monitor()
+        if mon then
+            -- Hyprland posiciona em coordenadas lógicas (físico / scale), não em pixels físicos
+            local scale = mon.scale or 1
+            local logical_w = mon.width / scale
+            local logical_h = mon.height / scale
+            hl.dispatch(hl.dsp.window.move({ x = logical_w - 440, y = logical_h - 280 }))
+        end
+    end
+end)
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
@@ -284,8 +309,10 @@ hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("vesktop"))
 hl.bind(mainMod .. " + N",      hl.dsp.exec_cmd("code"))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("brave"))
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("kitty -e btop"))
+hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wifi-recover.sh"))
 hl.bind(mainMod .. " + space",  hl.dsp.exec_cmd("fuzzel"))
 hl.bind("PRINT", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/screenshot_clipboard.sh"))
+hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/screenshot_area_clipboard.sh"))
 hl.bind("ALT + TAB", hl.dsp.window.cycle_next())
 
 -- Move focus with mainMod + arrow keys

@@ -1,0 +1,60 @@
+* {
+    font-family: "JetBrainsMono Nerd Font Mono", sans-serif;
+    font-size: 13px;
+}
+
+.control-center,
+.floating-notifications {
+    background-color: transparent;
+}
+
+.notification-row .notification-background {
+    background-color: rgba(26, 27, 38, 0.95);
+    color: #c0caf5;
+    border-radius: 10px;
+    border: 1px solid #414868;
+}
+
+.notification-row .notification-background .notification-content {
+    padding: 8px;
+}
+
+.notification-row .notification-background .close-button {
+    background-color: #414868;
+    color: #c0caf5;
+    border-radius: 8px;
+}
+
+.notification-row .notification-background .close-button:hover {
+    background-color: #f7768e;
+}
+
+.critical .notification-background {
+    border: 1px solid #f7768e;
+}
+
+.control-center {
+    background-color: rgba(26, 27, 38, 0.97);
+    border-radius: 10px;
+    border: 1px solid #414868;
+}
+
+.control-center .widget-title {
+    color: #c0caf5;
+    font-weight: bold;
+}
+
+.control-center .widget-title button {
+    background-color: #414868;
+    color: #c0caf5;
+    border-radius: 8px;
+}
+
+.control-center .widget-title button:hover {
+    background-color: #7aa2f7;
+    color: #1a1b26;
+}
+
+.control-center .widget-dnd {
+    color: #c0caf5;
+}
