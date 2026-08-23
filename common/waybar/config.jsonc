@@ -126,14 +126,7 @@
 
     "custom/notification": {
         "tooltip": true,
-        "tooltip-format": "Notificações (clique pra abrir o painel)",
-        "format": "{icon}",
-        "format-icons": {
-            "notification": "<span foreground='#f7768e'><sup></sup></span>",
-            "none": "",
-            "dnd-notification": "<span foreground='#f7768e'><sup></sup></span>",
-            "dnd-none": ""
-        },
+        "format": "🔔 {}",
         "return-type": "json",
         "exec-if": "which swaync-client",
         "exec": "swaync-client -swb",

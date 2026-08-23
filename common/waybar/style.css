@@ -86,3 +86,12 @@ window#waybar {
 #battery.charging {
     color: #9ece6a;
 }
+
+#custom-notification {
+    color: #c0caf5;
+}
+
+#custom-notification.notification,
+#custom-notification.dnd-notification {
+    color: #f7768e;
+}
