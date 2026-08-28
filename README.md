@@ -136,8 +136,12 @@ sudo pacman -S rofi-wayland
 Apps referenciados nos binds que não vêm do repositório oficial (instale via AUR com `yay`/`paru` se quiser tudo funcionando, ou ajuste os binds em `hyprland.lua`):
 
 ```bash
-yay -S visual-studio-code-bin vesktop-bin brave-bin
+yay -S visual-studio-code-bin dissent-bin vesktop-bin brave-bin
 ```
+
+- `SUPER+D` = **dissent** (cliente Discord nativo em GTK4, sem Electron). Deps que
+  não vêm sozinhas: `sudo pacman -S gtksourceview5 libspelling gobject-introspection`.
+- `SUPER+SHIFT+D` = **vesktop** (Electron) — fallback, voz costuma ser mais estável nele.
 
 ## Instalação
 
