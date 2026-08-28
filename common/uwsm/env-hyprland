@@ -1,15 +1,24 @@
 # Sourced pelo UWSM antes de iniciar o Hyprland (ver `uwsm/README.md`, seção
 # "Environment").
 #
-# Força o Aquamarine a renderizar o desktop na iGPU AMD em vez da dGPU
-# NVIDIA. Sem isso, o Hyprland abre /dev/nvidia* e a dGPU nunca entra em
-# runtime suspend, mesmo parada (~9W extras o tempo todo — ver README).
-# Apps que precisam da dGPU: use o wrapper `nvidia-offload <comando>`.
+# NOTEBOOK HÍBRIDO (iGPU AMD + dGPU NVIDIA): força o Aquamarine a renderizar o
+# desktop na iGPU em vez da dGPU. Sem isso, o Hyprland abre /dev/nvidia* e a
+# dGPU nunca entra em runtime suspend, mesmo parada (~9W extras o tempo todo —
+# ver README). Apps que precisam da dGPU: use o wrapper `nvidia-offload <cmd>`.
 #
-# AQ_DRM_DEVICES é uma lista separada por ":", e o nome do symlink em
-# /dev/dri/by-path/ já contém ":" (ex.: pci-0000:05:00.0-card), o que faz o
-# Aquamarine partir o próprio caminho em pedaços e não achar nenhuma GPU
-# (erro "Found no gpus to use, cannot continue"). Por isso resolvemos o
-# symlink aqui com readlink -f antes de exportar, virando algo sem ":"
-# (ex.: /dev/dri/card1).
-export AQ_DRM_DEVICES=$(readlink -f /dev/dri/by-path/pci-0000:05:00.0-card)
+# MÁQUINA DE UMA GPU SÓ (ex.: desktop): deixe AQ_DRM_DEVICES sem definir e o
+# Aquamarine autodetecta a única GPU. O bloco abaixo só exporta a variável se
+# o device da GPU primária configurada realmente existir — então num PC onde
+# esse slot PCI não existe, ele simplesmente não faz nada.
+#
+# Ajuste PRIMARY_GPU_PCI pro endereço PCI da iGPU (veja `lspci | grep VGA`,
+# formato "0000:05:00.0"). AQ_DRM_DEVICES é lista separada por ":" e o nome do
+# symlink em /dev/dri/by-path/ já contém ":", o que confunde o parser do
+# Aquamarine ("Found no gpus to use") — por isso resolvemos com readlink -f
+# antes de exportar, virando algo sem ":" (ex.: /dev/dri/card1).
+PRIMARY_GPU_PCI="0000:05:00.0"
+_gpu_card="/dev/dri/by-path/pci-${PRIMARY_GPU_PCI}-card"
+if [ -e "$_gpu_card" ]; then
+    export AQ_DRM_DEVICES=$(readlink -f "$_gpu_card")
+fi
+unset _gpu_card PRIMARY_GPU_PCI
