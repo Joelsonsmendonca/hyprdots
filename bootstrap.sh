@@ -30,7 +30,7 @@ link() {  # link <alvo> <origem>
 echo "==> Configs (~/.config/<app>)"
 for d in "$REPO"/common/*/; do
   app=$(basename "$d")
-  case "$app" in system|systemd) continue ;; esac   # tratados abaixo / à mão
+  case "$app" in system|systemd|easyeffects) continue ;; esac   # tratados abaixo / à mão
   link "$CFG/$app" "$REPO/common/$app"
 done
 
@@ -45,6 +45,16 @@ echo "==> Wrapper nvidia-offload (~/.local/bin)"
 if [[ -e "$REPO/common/hypr/scripts/nvidia-offload.sh" ]]; then
   link "$HOME/.local/bin/nvidia-offload" "$REPO/common/hypr/scripts/nvidia-offload.sh"
 fi
+
+echo "==> Preset do EasyEffects (~/.local/share/easyeffects/output)"
+# EasyEffects 8 guarda os settings dele em ~/.config/easyeffects/db/ (precisa
+# escrever lá) e lê presets de ~/.local/share/easyeffects/output/. Por isso o
+# preset é symlinkado só como arquivo, não a pasta ~/.config/easyeffects inteira.
+DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
+for p in "$REPO"/common/easyeffects/*.json; do
+  [[ -e $p ]] || continue
+  link "$DATA/easyeffects/output/$(basename "$p")" "$p"
+done
 
 cat <<EOF
 

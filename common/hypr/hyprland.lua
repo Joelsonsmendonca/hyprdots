@@ -84,6 +84,10 @@ local menu        = "wofi --show drun"
 hl.on("hyprland.start", function ()
   hl.exec_cmd("waybar")
   hl.exec_cmd("swaync")
+  -- EQ do áudio em background (reaplica o último preset de saída do EasyEffects
+  -- — presets do headset JBL em common/easyeffects/). Sem janela, sem efeito se
+  -- o easyeffects não estiver instalado. Ver README -> Áudio.
+  hl.exec_cmd("easyeffects --service-mode")
 end)
 
 
