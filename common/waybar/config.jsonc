@@ -7,7 +7,7 @@
 
     // Módulos da Esquerda
     "modules-left": [
-        "hyprland/workspaces",
+        "ext/workspaces",
         "hyprland/window"
     ],
 
@@ -35,21 +35,23 @@
 
     // --- Configurações Detalhadas dos Módulos ---
 
-    "hyprland/workspaces": {
-        "format": "{icon} {id}",
-        "on-click": "activate",
+    // Usamos ext/workspaces (protocolo ext-workspace-v1), NAO hyprland/workspaces.
+    // Motivo: a config do Hyprland e Lua, e nesse modo o servidor rejeita os
+    // dispatches em texto ("dispatch workspace 5" -> erro de sintaxe Lua). O
+    // hyprland/workspaces clica mandando exatamente esse texto, entao clicar nao
+    // faz nada. O ext/workspaces ativa o workspace pelo protocolo Wayland direto.
+    "ext/workspaces": {
+        "format": "{icon} {name}",
+        "sort-by": "number",
         "format-icons": {
             "default": "",
             "urgent": "",
             "active": ""
         },
-        "persistent_workspaces": {
-            "1": [],
-            "2": [],
-            "3": [],
-            "4": [],
-            "5": []
-        }
+        // all-outputs=false (padrão): cada barra mostra só os workspaces do SEU monitor.
+        // Os workspaces fixos são definidos no hyprland.lua (workspace_rule persistent),
+        // então no desktop a barra do LG mostra 1-5 e a do AOC mostra 6-10 sozinhas.
+        "all-outputs": false
     },
 
     "hyprland/window": {
@@ -104,10 +106,14 @@
     "pulseaudio": {
         "format": "{icon} {volume}%",
         "format-muted": " Mudo",
-        "on-click": "pavucontrol",
-        "on-scroll-up": "pamixer -i 5",   // Aumenta volume
-        "on-scroll-down": "pamixer -d 5", // Diminui volume
+        // Scroll usa o controle NATIVO do waybar (libpulse -> mesmo sink default
+        // das teclas de volume via wpctl). Antes chamava `pamixer`, que NAO esta
+        // instalado -> rolar o icone nao fazia nada e parecia "outro sistema".
+        // max-volume 100 pra bater com o `-l 1` das teclas.
         "scroll-step": 5,
+        "max-volume": 100,
+        "on-click": "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
         "format-icons": {
             "default": ["", ""]
         }
