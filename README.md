@@ -14,6 +14,7 @@ Configurações pessoais de desktop para [Hyprland](https://hyprland.org/), incl
 | [Wofi](https://hg.sr.ht/~scoopta/wofi) | Menu/dmenu (energia, popup de atalhos) | `common/wofi/` |
 | [UWSM](https://github.com/Vladimir-csp/uwsm) | Environment do Hyprland (variáveis pré-login) | `common/uwsm/env-hyprland` |
 | [PipeWire](https://pipewire.org/) | Áudio (buffer maior pra evitar corte em dongles USB) | `common/pipewire/pipewire.conf.d/` |
+| [EasyEffects](https://github.com/wwmm/easyeffects) | EQ de saída (headset JBL Quantum sem o timbre abafado) | `common/easyeffects/JBL-Quantum-360.json` |
 | systemd --user | Override pra reiniciar apps de autostart que crasham (ex.: nm-applet) + notificação de crash | `common/systemd/user/` |
 | [SwayNotificationCenter](https://github.com/ErikReider/SwayNotificationCenter) | Daemon de notificação + painel de histórico (botão na Waybar) | `common/swaync/` |
 
@@ -61,6 +62,21 @@ O wrapper (`common/hypr/scripts/nvidia-offload.sh`, symlinkado em `~/.local/bin/
 
 **Áudio corta ("Broken pipe" nos logs do PipeWire) em dongles USB.** É buffer pequeno demais pro dongle, não economia de energia — o mesmo padrão de erro (`spa.alsa: ... snd_pcm_avail after recover: Broken pipe`) tem relatos confirmados no fórum do Arch resolvidos aumentando o quantum de clock do PipeWire. `common/pipewire/pipewire.conf.d/99-quantum.conf` sobe `default.clock.quantum` pra 2048 (min 1024, max 4096), dando mais margem de buffer. Se cortar de novo antes disso surtir efeito: `systemctl --user restart pipewire pipewire-pulse wireplumber`.
 
+**Som "abafado" comparado ao Windows (headset JBL Quantum).** O plumbing tá certo (estéreo 48 kHz, sem resample nem downmix). O JBL Quantum é afinado escuro/grave e no Windows o QuantumENGINE aplica um EQ que o Linux não tem. Fix: EasyEffects com um preset de EQ.
+```bash
+sudo pacman -S easyeffects lsp-plugins-lv2   # lsp-plugins é o que faz o equalizador funcionar
+```
+- Autostart já está no `hyprland.lua` (`easyeffects --service-mode`, no-op se não instalado).
+- Não existe EQ público pro Quantum 360 Wireless especificamente. `common/easyeffects/` traz 3 presets (instalados pelo `bootstrap.sh` em `~/.local/share/easyeffects/output/`), troca com `easyeffects -l <nome>`:
+  - **`JBL-Quantum-800-AutoEq`** — AutoEq do Quantum 800 (irmão mais próximo: wireless, mesma família de driver). É o padrão ativo.
+  - **`JBL-Quantum-400-AutoEq`** — AutoEq do Quantum 400 (mais grave, shelf de +18 dB — pode ficar bumbo).
+  - **`JBL-Quantum-360`** — curva feita à mão, correção mais suave.
+- Os AutoEq miram a curva Harman (grave + agudo fortes); se ficar estridente, abrir o EasyEffects e baixar as bandas de 4–9 kHz.
+- Pra testar outros: no EasyEffects, plugin Equalizer → botão de importar → colar um `ParametricEQ.txt` do [AutoEq](https://github.com/jaakkopasanen/AutoEq/tree/master/results). Ou a aba *Presets → Community*.
+- Conferir também o botão de EQ na concha do headset (o Q360 tem presets no hardware).
+
+**Rolar o ícone de volume da Waybar não fazia nada.** O módulo `pulseaudio` chamava `pamixer` (não instalado) no scroll — as teclas de volume (via `wpctl`) funcionavam, o scroll não, dando impressão de "dois sistemas de volume". Agora o scroll usa o controle nativo do Waybar (libpulse → mesmo sink default das teclas).
+
 **Wifi rejeita conexão mesmo com sinal bom ("status: 1" no log do iwd).** Diferente do caso do
 BSS obsoleto acima — aqui `journalctl -u iwd` mostra `connect-failed, status: 1` na hora, com
 sinal ótimo, e o `dmesg` tem `Direct firmware load for regulatory.db failed`. Causa: o pacote
@@ -90,6 +106,9 @@ sudo modprobe -r ideapad_laptop && sudo modprobe ideapad_laptop   # ou reboot
 | Wifi "sem sinal" com roteador saudável perto | BSS obsoleto em cache no iwd após falhas repetidas | `SUPER+SHIFT+W` (ou `common/hypr/scripts/wifi-recover.sh`) |
 | Wifi rejeita conexão (`status: 1`) mesmo com sinal bom | `wireless-regdb` ausente, regdomain `00: DFS-UNSET` | `sudo pacman -S wireless-regdb iw && sudo iw reg set BR` |
 | Áudio corta, log do PipeWire mostra "Broken pipe" | Buffer pequeno pro dongle USB | `systemctl --user restart pipewire pipewire-pulse wireplumber` |
+| Som "abafado" comparado ao Windows | Headset JBL sem o EQ que o QuantumENGINE aplica no Windows | `sudo pacman -S easyeffects lsp-plugins-lv2` — preset `JBL-Quantum-360` entra sozinho (ver Confiabilidade → Áudio) |
+| Rolar o ícone de volume da Waybar não muda nada | Módulo chamava `pamixer` (não instalado); as teclas usam `wpctl` | Já corrigido — scroll agora é nativo do Waybar |
+| Clicar num workspace na Waybar não troca de workspace | Config Lua do Hyprland rejeita dispatch em texto (`dispatch workspace N`) | Sem solução limpa ainda — ver `KNOWN-ISSUES.md` |
 | Ícone de rede/bluetooth sumiu da tray | App de autostart crashou (segfault real, não falta de exec-once) | `systemctl --user status 'app-nm\x2dapplet@autostart.service'` — deve reiniciar sozinho e notificar |
 | Touchpad não responde | Fn+F10 (toggle de hardware, não é bug de software) | Aperta Fn+F10 de novo |
 | Print (PRTSC) não vai pra área de transferência | `wl-clipboard` não instalado | `sudo pacman -S wl-clipboard` |
@@ -103,7 +122,7 @@ Testado em Arch Linux. Pacotes necessários:
 sudo pacman -S hyprland uwsm waybar kitty wofi fuzzel grim slurp wl-clipboard \
     brightnessctl wireplumber pavucontrol dolphin btop ttf-jetbrains-mono-nerd \
     python playerctl power-profiles-daemon network-manager-applet blueman swaync \
-    wireless-regdb iw
+    wireless-regdb iw easyeffects lsp-plugins-lv2
 
 # rofi com suporte a Wayland
 sudo pacman -S rofi-wayland

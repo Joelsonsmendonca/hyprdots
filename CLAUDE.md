@@ -35,6 +35,56 @@ de calcular posição — já mordemos essa (janela ia parar fora da tela, ver h
 `grim` e checar visualmente — já aconteceu do estado reportado por `hyprctl activewindow -j`
 não bater com o que renderizava na tela.
 
+**Dispatch em TEXTO clássico está morto (parser Lua).** Qualquer `dispatch workspace 5`,
+`dispatch exec ...`, etc. — mandado por `hyprctl` OU direto no socket1 — o servidor
+embrulha em `return hl.dispatch(workspace 5)` e quebra com erro de sintaxe Lua. Só funciona
+a forma `hl.dsp.*` (ex.: `hyprctl dispatch 'hl.dsp.focus({ workspace = 5 })'`). Consequência
+prática: ferramentas do ecossistema que disparam texto clássico não conseguem dirigir o
+Hyprland. **Waybar é o caso concreto** — `hyprland/workspaces` troca de workspace mandando
+`dispatch workspace N`, então clicar no módulo não faz nada. Solução aplicada:
+`common/waybar/config.jsonc` usa **`ext/workspaces`** (protocolo `ext-workspace-v1`, ativa
+via Wayland puro, sem dispatch de texto) com `"sort-by": "number"`.
+
+- Testado com cliente Wayland cru: o `activate` do ext-workspace **funciona** pra trocar
+  workspace no monitor em foco (1→4, 1→2, etc. OK). Limitação: ativar workspace que vive
+  em OUTRO monitor troca lá mas não move o foco do teclado pra esse monitor — clicar o
+  número na barra do monitor que você está olhando é o caminho que funciona 100%.
+- `hyprctl dispatch` NÃO testa clique de barra. Clique em layer-shell não dá pra simular
+  com uinput aqui (só `follow_mouse` responde); confiar no teste do protocolo + pedir
+  pro usuário validar na mão.
+
+- Espelhar/estender telas em runtime: `hyprctl keyword monitor ...` também morre ("non-legacy
+  parsers") — usar `hyprctl eval 'hl.monitor({...})'` (é o que `scripts/mirror-toggle.sh` faz).
+
+## Monitores: multi-host numa config só
+
+`common/hypr/hyprland.lua` (seção MONITORS) usa **regra genérica `output=""` + regras
+`desc:` específicas**. Regra cujo output não está conectado é ignorada sem erro, então o
+mesmo arquivo cobre: notebook sozinho, notebook + projetor da facul (genérica liga
+estendido; `SUPER+SHIFT+P` → `scripts/mirror-toggle.sh` alterna espelhamento), e o
+desktop de casa (LG UltraWide `desc:LG Electronics LG ULTRAWIDE` à esquerda/principal em
+`0x0`, AOC `desc:AOC 1970W` à direita em `3440x0`).
+
+- Casar por `desc:` (não por `HDMI-A-1`/`DP-3`) — o nome da porta muda de máquina pra
+  máquina, a descrição EDID não.
+- `hyprctl keyword monitor ...` responde "keyword can't work with non-legacy parsers"
+  (config é Lua). Pra testar ao vivo, editar o `.lua` e `hyprctl reload` — funciona.
+- **Não há regra pra tela interna do notebook** — o usuário não sabe o nome dela e a regra
+  genérica `output=""` já cobre (preferred/auto/scale 1). Se um dia precisar de scale
+  diferente no painel do note, aí sim pegar o nome com `hyprctl monitors` e adicionar linha.
+- `mirror-toggle.sh` parseia texto do `hyprctl monitors all` (sem jq — jq não está
+  instalado). Usa `monitors all` porque monitor espelhando some do `monitors` normal.
+- **Workspaces fixos por monitor** (só materializam onde o `desc:` existe): 1-5 no LG,
+  6-10 no AOC, via `hl.workspace_rule({ persistent = true, monitor = "desc:..." })`. No
+  notebook sozinho nenhuma regra casa e os 10 workspaces ficam no eDP como sempre.
+
+## Teclado
+
+Físico é **ANSI/US** (não ABNT2). `hyprland.lua` usa `kb_layout = "us"`,
+`kb_variant = "altgr-intl"` — ASCII direto, AltGr (Alt direito) pros acentos PT-BR
+(AltGr+, = ç; AltGr+' então vogal = acento agudo; AltGr+~ então vogal = til). Trocar por
+`"intl"` se quiser dead key já sem AltGr.
+
 ## Autostart é systemd de verdade (via UWSM)
 
 Cada `.desktop` em `/etc/xdg/autostart/` ou `~/.config/autostart/` vira uma unidade
@@ -71,6 +121,27 @@ qualquer coisa que precise saber QUAL app disparou o `OnFailure=`/gatilho.
   iwd→wpa_supplicant, checar se isso já foi aplicado.
 - **Áudio USB cortando ("Broken pipe" no log do PipeWire)**: não é economia de energia, é
   quantum de buffer pequeno pro dongle. Ver `common/pipewire/pipewire.conf.d/99-quantum.conf`.
+- **Som "abafado" vs Windows (headset JBL Quantum 360 Wireless)**: NÃO é bug de plumbing —
+  já checado: sink em `S16LE 48000 2ch`, sem resample, sem downmix, profile `analog-stereo`,
+  formato negociado limpo. É o timbre cru do headset (JBL afina escuro e conta com o EQ do
+  QuantumENGINE, que só existe no Windows). **Resolvido** com EasyEffects 8:
+  - Autostart: `easyeffects --service-mode` no `hyprland.lua` (`--gapplication-service` é
+    deprecado no EE8). No-op se o pacote não existir. Precisa de `lsp-plugins-lv2` pro
+    equalizador funcionar (dep OPCIONAL do easyeffects — instalar à mão).
+  - Presets em `common/easyeffects/*.json` (formato EE7, o EE8 lê sem reclamar). Symlinkados
+    pra `~/.local/share/easyeffects/output/` pelo `bootstrap.sh` (loop `*.json`; NÃO
+    symlinkar a pasta `~/.config/easyeffects` inteira — o EE8 escreve o DB de settings em
+    `db/` lá dentro). Não existe EQ público pro Quantum 360 Wireless; os prontos são AutoEq
+    do 800 (`JBL-Quantum-800-AutoEq`, irmão mais próximo — padrão ativo) e do 400
+    (`JBL-Quantum-400-AutoEq`), + um manual mais suave (`JBL-Quantum-360`). Trocar com
+    `easyeffects -l <nome>`. AutoEq txt importável direto na GUI (plugin Equalizer → import).
+  - EE8 reaplica o último preset de saída sozinho no start; `easyeffects -l <nome>` recarrega
+    na mão, `easyeffects -s` mostra o ativo.
+  - Não perder tempo procurando problema no PipeWire de novo.
+- **Scroll no ícone de volume da Waybar não fazia nada**: `pulseaudio` module chamava
+  `pamixer` (não instalado). Trocado pelo scroll nativo do Waybar (libpulse). As teclas de
+  volume usam `wpctl` — ambos batem no mesmo sink default agora. `pamixer` continua fora;
+  se for adicionar controle de volume em script, usar `wpctl`.
 - **Touchpad "travado"**: neste hardware o toggle Fn é 100% EC/firmware
   (`touchpad_ctrl_via_ec=N` por padrão), invisível pro Linux — não tem log, não tem rfkill.
   `common/system/modprobe.d/` tem a opção pra expor isso ao kernel, se ainda não foi aplicada.
