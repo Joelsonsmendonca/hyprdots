@@ -136,12 +136,13 @@ sudo pacman -S rofi-wayland
 Apps referenciados nos binds que não vêm do repositório oficial (instale via AUR com `yay`/`paru` se quiser tudo funcionando, ou ajuste os binds em `hyprland.lua`):
 
 ```bash
-yay -S visual-studio-code-bin dissent-bin vesktop-bin brave-bin
+yay -S visual-studio-code-bin vesktop-bin brave-bin
 ```
 
-- `SUPER+D` = **dissent** (cliente Discord nativo em GTK4, sem Electron). Deps que
-  não vêm sozinhas: `sudo pacman -S gtksourceview5 libspelling gobject-introspection`.
-- `SUPER+SHIFT+D` = **vesktop** (Electron) — fallback, voz costuma ser mais estável nele.
+> Nota: `SUPER+D` abre o **vesktop**. Clientes nativos (Dissent, Abaddon) foram
+> testados e descartados — Dissent não tem voz (por design) e trava em canais com
+> Components V2; Abaddon tem voz mas UI própria pouco polida. Voz nativa fora do
+> Electron ainda depende do DAVE/E2EE, que virou obrigatório em mar/2026.
 
 ## Instalação
 

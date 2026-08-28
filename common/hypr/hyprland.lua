@@ -342,8 +342,7 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Binds customizados (portados do setup anterior)
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd("kitty"))
-hl.bind(mainMod .. " + D",         hl.dsp.exec_cmd("dissent"))   -- cliente nativo GTK4 (sem Electron)
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("vesktop"))   -- fallback Electron (voz mais estável)
+hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("vesktop"))
 hl.bind(mainMod .. " + N",      hl.dsp.exec_cmd("code"))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("brave"))
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("kitty -e btop"))
