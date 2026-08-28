@@ -74,6 +74,10 @@ desktop de casa (LG UltraWide `desc:LG Electronics LG ULTRAWIDE` à esquerda/pri
   diferente no painel do note, aí sim pegar o nome com `hyprctl monitors` e adicionar linha.
 - `mirror-toggle.sh` parseia texto do `hyprctl monitors all` (sem jq — jq não está
   instalado). Usa `monitors all` porque monitor espelhando some do `monitors` normal.
+- **`SUPER+SHIFT+M` → `scripts/monitor-toggle.sh`**: liga/desliga o AOC (pra ficar só no
+  UltraWide). Desliga com `hl.monitor({ disabled = true })`; religar exige `disabled = false`
+  EXPLÍCITO no mesmo `hl.monitor` (só passar mode/position não reativa). Monitor desligado
+  aparece em `monitors all` com `disabled: true`.
 - **Workspaces fixos por monitor** (só materializam onde o `desc:` existe): 1-5 no LG,
   6-10 no AOC, via `hl.workspace_rule({ persistent = true, monitor = "desc:..." })`. No
   notebook sozinho nenhuma regra casa e os 10 workspaces ficam no eDP como sempre.
@@ -81,9 +85,23 @@ desktop de casa (LG UltraWide `desc:LG Electronics LG ULTRAWIDE` à esquerda/pri
 ## Teclado
 
 Físico é **ANSI/US** (não ABNT2). `hyprland.lua` usa `kb_layout = "us"`,
-`kb_variant = "altgr-intl"` — ASCII direto, AltGr (Alt direito) pros acentos PT-BR
-(AltGr+, = ç; AltGr+' então vogal = acento agudo; AltGr+~ então vogal = til). Trocar por
-`"intl"` se quiser dead key já sem AltGr.
+`kb_variant = "intl"` (US Internacional com dead keys — igual ao ´ do ABNT2): `'`+vogal =
+acento agudo, `'`+c = ç, `~`+a/o/n = til, `^`+vogal = circunflexo, `` ` ``+vogal = crase,
+`"`+vogal = trema. `'` `"` `~` `^` `` ` `` literais: tecla + espaço. AltGr+, também dá ç.
+
+- **`altgr-intl` foi testado e abandonado**: exige AltGr (Alt direito) pra TODO acento, o
+  que é chato, e o Alt direito deixa de ser Alt (vira ISO_Level3_Shift). Com `intl` os dead
+  keys não precisam de AltGr — só o Alt esquerdo importa (Alt+Tab etc.).
+- **Alt direito NÃO é Alt** em qualquer variante `intl`/`altgr-intl`/`abnt2` (é o AltGr).
+  Alt+Tab, Alt+F4 etc. = **Alt ESQUERDO**.
+- Dead key é composição do lado do cliente (toolkit). Funciona em apps GTK/Qt/kitty/Firefox
+  nativos; **Electron no Wayland (vesktop/Discord, Steam) tem bug conhecido de dead key** —
+  se acento não sai só lá, é o app, não a config.
+- `hyprctl eval` NÃO retorna valor (só "ok"), então não dá pra checar tecla presa com
+  `hl.is_key_down` por ele; usar `hl.notification.create({ text = ..., time = N })` + `grim`.
+- **Não testar teclado com uinput sintético neste ambiente** — os testes falharam (foco,
+  timeout) e correm risco de deixar modificador preso (quebra Alt+Tab e digitação). Se
+  acontecer: soltar os mods sintéticos ou relogar.
 
 ## Autostart é systemd de verdade (via UWSM)
 

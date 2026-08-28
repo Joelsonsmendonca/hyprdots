@@ -260,15 +260,15 @@ hl.config({
 
 hl.config({
     input = {
-        -- Teclado físico ANSI/US. "altgr-intl": digitação ASCII normal (aspas,
-        -- crase e til NÃO viram dead key), e o AltGr (Alt direito) dá os acentos:
-        --   AltGr + ,            -> ç   (AltGr + Shift + , -> Ç)
-        --   AltGr + '  então vogal -> á é í ó ú     (AltGr + Shift + ' -> trema: ü)
-        --   AltGr + ~  então vogal -> ã õ ñ
-        --   AltGr + `  então vogal -> à     |  AltGr + 6 então vogal -> â ê ô
-        -- Pra dead keys já no nível normal (sem AltGr), trocar variant por "intl".
+        -- Teclado físico ANSI/US. "intl" (US Internacional c/ dead keys) — igual
+        -- ao ´ do ABNT2:
+        --   '  então vogal  -> á é í ó ú       |  '  então c  -> ç
+        --   ~  então a/o/n  -> ã õ ñ           |  ^  então vogal -> â ê ô
+        --   `  então vogal  -> à              |  "  então vogal -> ä ë ü
+        --   AltGr + ,       -> ç  (também funciona)
+        -- Pra digitar ' " ~ ^ ` literais: a tecla + espaço.
         kb_layout  = "us",
-        kb_variant = "altgr-intl",
+        kb_variant = "intl",
         kb_model   = "",
         kb_options = "",
         kb_rules   = "",

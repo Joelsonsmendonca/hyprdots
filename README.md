@@ -109,6 +109,9 @@ sudo modprobe -r ideapad_laptop && sudo modprobe ideapad_laptop   # ou reboot
 | Som "abafado" comparado ao Windows | Headset JBL sem o EQ que o QuantumENGINE aplica no Windows | `sudo pacman -S easyeffects lsp-plugins-lv2` — preset `JBL-Quantum-360` entra sozinho (ver Confiabilidade → Áudio) |
 | Rolar o ícone de volume da Waybar não muda nada | Módulo chamava `pamixer` (não instalado); as teclas usam `wpctl` | Já corrigido — scroll agora é nativo do Waybar |
 | Clicar num workspace na Waybar não troca de workspace | Config Lua do Hyprland rejeita dispatch em texto (`dispatch workspace N`) | Sem solução limpa ainda — ver `KNOWN-ISSUES.md` |
+| Quero ficar só com o UltraWide | — | `SUPER+SHIFT+M` liga/desliga o AOC (`common/hypr/scripts/monitor-toggle.sh`) |
+| Acento não sai | Layout `us/intl`: usa dead key — `'` depois da vogal (`'`+c = ç). Alt direito NÃO é Alt | Em Electron/Wayland (Discord, Steam) dead key é bug do app; testar num kitty/Firefox |
+| Alt+Tab não funciona | Alt direito virou AltGr (padrão de qualquer layout com acento) | Usar **Alt esquerdo** + Tab |
 | Ícone de rede/bluetooth sumiu da tray | App de autostart crashou (segfault real, não falta de exec-once) | `systemctl --user status 'app-nm\x2dapplet@autostart.service'` — deve reiniciar sozinho e notificar |
 | Touchpad não responde | Fn+F10 (toggle de hardware, não é bug de software) | Aperta Fn+F10 de novo |
 | Print (PRTSC) não vai pra área de transferência | `wl-clipboard` não instalado | `sudo pacman -S wl-clipboard` |
