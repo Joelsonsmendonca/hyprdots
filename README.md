@@ -119,49 +119,39 @@ yay -S visual-studio-code-bin vesktop-bin brave-bin
 
 ## Instalação
 
-1. Clone o repositório em `~/dotfiles`:
+```bash
+git clone https://github.com/Joelsonsmendonca/hyprdots.git ~/dotfiles
+~/dotfiles/bootstrap.sh
+```
 
-   ```bash
-   git clone https://github.com/Joelsonsmendonca/hyprdots.git ~/dotfiles
-   ```
+`bootstrap.sh` é idempotente: faz backup de configs existentes que não sejam
+symlink, cria os links `~/.config/<app>` → `common/<app>`, symlinka as unidades
+`systemd --user`, cria o wrapper `~/.local/bin/nvidia-offload` e liga a
+`battery-notify.timer`. Depois: **ajuste o PCI da GPU em
+`common/uwsm/env-hyprland`** (`lspci | grep VGA`) e faça logout/login no Hyprland.
 
-2. Faça backup de configs existentes (se já tiver algo em `~/.config`):
+Configs de sistema (precisam de `sudo`, específicas do notebook híbrido) o script
+não aplica sozinho — ele imprime o comando:
 
-   ```bash
-   for app in hypr kitty rofi waybar wofi fuzzel uwsm pipewire swaync; do
-       [ -e "$HOME/.config/$app" ] && [ ! -L "$HOME/.config/$app" ] && \
-           mv "$HOME/.config/$app" "$HOME/.config/${app}.bak"
-   done
-   ```
+```bash
+sudo cp ~/dotfiles/common/system/modprobe.d/*.conf /etc/modprobe.d/
+```
 
-3. Crie os symlinks para `~/.config`:
+<details><summary>o que o bootstrap.sh faz, passo a passo</summary>
 
-   ```bash
-   mkdir -p ~/.config
-   for app in hypr kitty rofi waybar wofi fuzzel uwsm pipewire swaync; do
-       ln -sfn "$HOME/dotfiles/common/$app" "$HOME/.config/$app"
-   done
-   ```
-
-   O override do systemd (restart automático de apps de autostart que crasham) é por unidade, então symlinka separado:
-
-   ```bash
-   mkdir -p ~/.config/systemd/user
-   ln -sfn "$HOME/dotfiles/common/systemd/user/app-nm\x2dapplet@autostart.service.d" \
-       "$HOME/.config/systemd/user/app-nm\x2dapplet@autostart.service.d"
-   systemctl --user daemon-reload
-   ```
-
-4. (Só em notebook híbrido AMD+NVIDIA) crie o atalho do wrapper de offload:
-
-   ```bash
-   mkdir -p ~/.local/bin
-   ln -sfn "$HOME/.config/hypr/scripts/nvidia-offload.sh" ~/.local/bin/nvidia-offload
-   ```
-
-   Ajuste o caminho PCI em `common/uwsm/env-hyprland` para o da sua GPU (`lspci | grep VGA` mostra os endereços) antes disso — o valor atual é específico deste notebook.
-
-5. Reinicie o Hyprland (ou faça logout/login) para carregar as novas configs.
+```bash
+mkdir -p ~/.config ~/.config/systemd/user ~/.local/bin
+for app in hypr kitty rofi waybar wofi fuzzel uwsm pipewire swaync; do
+    [ -e ~/.config/$app ] && [ ! -L ~/.config/$app ] && mv ~/.config/$app ~/.config/$app.bak
+    ln -sfn ~/dotfiles/common/$app ~/.config/$app
+done
+for u in ~/dotfiles/common/systemd/user/*; do
+    ln -sfn "$u" ~/.config/systemd/user/"$(basename "$u")"
+done
+systemctl --user daemon-reload
+ln -sfn ~/.config/hypr/scripts/nvidia-offload.sh ~/.local/bin/nvidia-offload
+```
+</details>
 
 ## Estrutura
 
