@@ -256,8 +256,15 @@ hl.config({
 
 hl.config({
     input = {
-        kb_layout  = "br",
-        kb_variant = "abnt2",
+        -- Teclado físico ANSI/US. "altgr-intl": digitação ASCII normal (aspas,
+        -- crase e til NÃO viram dead key), e o AltGr (Alt direito) dá os acentos:
+        --   AltGr + ,            -> ç   (AltGr + Shift + , -> Ç)
+        --   AltGr + '  então vogal -> á é í ó ú     (AltGr + Shift + ' -> trema: ü)
+        --   AltGr + ~  então vogal -> ã õ ñ
+        --   AltGr + `  então vogal -> à     |  AltGr + 6 então vogal -> â ê ô
+        -- Pra dead keys já no nível normal (sem AltGr), trocar variant por "intl".
+        kb_layout  = "us",
+        kb_variant = "altgr-intl",
         kb_model   = "",
         kb_options = "",
         kb_rules   = "",
