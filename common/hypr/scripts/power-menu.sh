@@ -1,19 +1,20 @@
 #!/bin/bash
 # Menu de energia (desligar / reiniciar / suspender / hibernar)
-STYLE="$HOME/.config/wofi/style.css"
+# Usa fuzzel --index: retorna o NÚMERO da opção escolhida, sem depender de
+# casar o texto (o wofi --dmenu estava sempre devolvendo a 1ª linha).
 
-opcao=$(printf "%s\n%s\n%s\n%s\n%s\n" \
-    "  Desligar" \
-    "  Reiniciar" \
-    "  Suspender" \
-    "  Hibernar" \
-    "  Cancelar" \
-    | wofi --dmenu --prompt "Energia" --width 320 --height 280 --insensitive)
+idx=$(printf '%s\n' \
+    $'  Desligar' \
+    $'  Reiniciar' \
+    $'  Suspender' \
+    $'  Hibernar' \
+    $'  Cancelar' \
+    | fuzzel --dmenu --index --prompt 'Energia > ' --lines 5)
 
-case "$opcao" in
-    *Desligar)   systemctl poweroff ;;
-    *Reiniciar)  systemctl reboot ;;
-    *Suspender)  systemctl suspend ;;
-    *Hibernar)   systemctl hibernate ;;
+case "$idx" in
+    0) systemctl poweroff ;;
+    1) systemctl reboot ;;
+    2) systemctl suspend ;;
+    3) systemctl hibernate ;;
     *) exit 0 ;;
 esac
