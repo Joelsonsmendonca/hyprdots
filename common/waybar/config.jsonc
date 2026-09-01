@@ -29,6 +29,7 @@
         "battery",
         "pulseaudio",
         "custom/notification",
+        "custom/update",
         "tray",
         "custom/power"
     ],
@@ -145,5 +146,12 @@
         "format": "",
         "tooltip-format": "Menu de energia",
         "on-click": "~/.config/hypr/scripts/power-menu.sh"
+    },
+
+    "custom/update": {
+        "format": " Update",
+        "tooltip-format": "Atualizar Sistema e IA",
+        "on-click": "kitty --title 'System Update' bash -c /home/joelson/.local/bin/update-all"
     }
+
 }
