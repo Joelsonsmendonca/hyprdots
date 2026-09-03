@@ -1,0 +1,22 @@
+#!/bin/bash
+echo "========================================"
+echo "    ATUALIZAÇÃO DO SISTEMA E IA         "
+echo "========================================"
+
+echo ""
+echo "-> Atualizando pacotes do Arch Linux..."
+sudo pacman -Syu --noconfirm
+
+echo ""
+echo "-> Atualizando ferramentas de IA (ia.skills)..."
+if [ -d "$HOME/.claude/skills/ia-skills" ]; then
+    cd "$HOME/.claude/skills/ia-skills" && git pull
+else
+    echo "ia.skills não encontrado."
+fi
+
+echo ""
+echo "========================================"
+echo " Atualização concluída com sucesso!"
+echo "========================================"
+read -p "Pressione ENTER para fechar..."
