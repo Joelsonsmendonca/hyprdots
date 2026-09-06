@@ -1,18 +1,18 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# Prompt limpo, escuro e moderno (sem blocos coloridos extravagantes)
+# Prompt limpo, escuro e moderno
 format = """
 $username\
 $directory\
 $git_branch\
 $git_status\
+$python\
 $character"""
 
 right_format = """
 $cmd_duration\
 $time"""
 
-# Adiciona linha em branco antes do prompt
 add_newline = true
 
 [character]
@@ -38,6 +38,11 @@ format = "on [$symbol$branch]($style) "
 [git_status]
 style = "bold red"
 format = '([$all_status$ahead_behind]($style) )'
+
+[python]
+symbol = "🐍 "
+style = "bold yellow"
+format = '[(\($virtualenv\) )]($style)'
 
 [cmd_duration]
 min_time = 2_000
