@@ -1,0 +1,51 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Prompt limpo, escuro e moderno (sem blocos coloridos extravagantes)
+format = """
+$username\
+$directory\
+$git_branch\
+$git_status\
+$character"""
+
+right_format = """
+$cmd_duration\
+$time"""
+
+# Adiciona linha em branco antes do prompt
+add_newline = true
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[✗](bold red)"
+
+[username]
+show_always = false
+style_user = "bold blue"
+format = "[$user]($style) "
+
+[directory]
+style = "bold cyan"
+truncation_length = 4
+truncate_to_repo = true
+format = "[$path]($style) "
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "on [$symbol$branch]($style) "
+
+[git_status]
+style = "bold red"
+format = '([$all_status$ahead_behind]($style) )'
+
+[cmd_duration]
+min_time = 2_000
+style = "dimmed yellow"
+format = "took [$duration]($style) "
+
+[time]
+disabled = false
+time_format = "%R"
+style = "dimmed white"
+format = "[$time]($style)"
