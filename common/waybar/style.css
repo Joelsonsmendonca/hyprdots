@@ -95,3 +95,16 @@ window#waybar {
 #custom-notification.dnd-notification {
     color: #f7768e;
 }
+
+#custom-aibar {
+    padding: 0 10px;
+    margin: 4px 2px;
+    color: #7aa2f7;
+    font-weight: bold;
+}
+
+#custom-aibar:hover {
+    background-color: rgba(65, 72, 104, 0.4);
+    border-radius: 8px;
+}
+
