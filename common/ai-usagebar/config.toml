@@ -1,0 +1,35 @@
+[ui]
+primary = "anthropic"
+
+[anthropic]
+enabled = true
+
+[minimax]
+enabled = true
+api_key = "sk-cp-tQrXGSDsfI-4Z7LddVbfkGehvWBovXsurXbxhICTkJlBsk_Vb-GPT12mWjfm85mYtBdQP0BbmO-0SMvHmVkS4yxp2Us3oEiLmOibUhTsnttQyhBEQZwHIC4"
+# region = "global"
+
+[antigravity]
+enabled = true
+
+[[custom]]
+id = "hetzner"
+name = "Hetzner"
+short_name = "htz"
+enabled = false
+url = "https://sua-url-do-hetzner-ou-proxy/api/usage"
+api_key = "y-0f1pLYSO5_YZacn8bWi1QnZu5HRkwX"
+
+[[custom.metrics]]
+label = "Uso"
+used = "/usage/requests/used"
+limit = "/usage/requests/limit"
+
+[openai]
+enabled = false
+
+[zai]
+enabled = false
+
+[openrouter]
+enabled = false
