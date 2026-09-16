@@ -2,4 +2,4 @@ _preexisting_backup_*/
 *.swp
 *.bak
 .DS_Store
-common/ai-usagebar/config.toml
+
