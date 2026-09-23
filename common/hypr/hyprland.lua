@@ -463,3 +463,10 @@ hl.window_rule({
     match = { float = true },
     center = true,
 })
+
+hl.window_rule({
+    name  = "gnome-calculator-float",
+    match = { class = "org.gnome.Calculator" },
+    float = true,
+    size  = "360 616",
+})
