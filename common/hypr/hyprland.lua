@@ -477,3 +477,10 @@ hl.window_rule({
     float = true,
     size  = "500 600",
 })
+
+hl.window_rule({
+    name  = "gnome-clocks-float",
+    match = { class = "org.gnome.clocks" },
+    float = true,
+    size  = "600 500",
+})
