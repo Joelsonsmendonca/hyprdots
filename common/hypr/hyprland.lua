@@ -470,3 +470,10 @@ hl.window_rule({
     float = true,
     size  = "360 616",
 })
+
+hl.window_rule({
+    name  = "gnome-text-editor-float",
+    match = { class = "org.gnome.TextEditor" },
+    float = true,
+    size  = "500 600",
+})
