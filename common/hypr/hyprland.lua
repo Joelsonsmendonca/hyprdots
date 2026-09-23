@@ -82,6 +82,7 @@ local menu        = "wofi --show drun"
 -- end)
 
 hl.on("hyprland.start", function ()
+  hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
   hl.exec_cmd("waybar")
   hl.exec_cmd("swaync")
   -- EQ do áudio em background (reaplica o último preset de saída do EasyEffects
