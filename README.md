@@ -6,7 +6,7 @@ Configurações pessoais de desktop para [Hyprland](https://hyprland.org/), incl
 
 | App | O que faz | Config |
 | --- | --- | --- |
-| [Hyprland](https://hyprland.org/) | Compositor Wayland | `common/hypr/hyprland.lua` |
+| [Hyprland](https://hyprland.org/) | Compositor Wayland | `common/hypr/hyprland.lua` + `common/hypr/conf/*.lua` |
 | [Waybar](https://github.com/Alexays/Waybar) | Barra de status | `common/waybar/` |
 | [Kitty](https://sw.kovidgoyal.io/kitty/) | Terminal | `common/kitty/kitty.conf` |
 | [Rofi](https://github.com/davatorium/rofi) | Launcher | `common/rofi/config.rasi` |
@@ -20,8 +20,8 @@ Configurações pessoais de desktop para [Hyprland](https://hyprland.org/), incl
 
 ### Destaques
 
-- Config do Hyprland em **Lua** (`hyprland.lua`), usando o suporte nativo do `hyprlang` — binds, monitores, regras de janela e autostart tudo num lugar só.
-- Popup de atalhos (`SUPER + tecla` na Waybar) que lê os `hl.bind(...)` direto do `hyprland.lua` e monta a lista dinamicamente via `wofi` — **fonte única de verdade**, sem lista duplicada para manter sincronizada.
+- Config do Hyprland em **Lua**: `hyprland.lua` só faz `require` dos módulos em `conf/` (monitors, autostart, look, input, binds, rules). Cada `require` roda isolado — erro num arquivo não derruba os outros.
+- Popup de atalhos (`SUPER + tecla` na Waybar) que lê os `hl.bind(...)` direto do `conf/binds.lua` e monta a lista dinamicamente via `wofi` — **fonte única de verdade**, sem lista duplicada para manter sincronizada.
 - Menu de energia (`common/hypr/scripts/power-menu.sh`) e screenshot para a área de transferência (`screenshot_clipboard.sh`, via `grim` + `slurp` + `wl-copy`).
 - Tema consistente entre Waybar / Wofi / popup de atalhos, usando `JetBrainsMono Nerd Font Mono`.
 
@@ -66,7 +66,7 @@ O wrapper (`common/hypr/scripts/nvidia-offload.sh`, symlinkado em `~/.local/bin/
 ```bash
 sudo pacman -S easyeffects lsp-plugins-lv2   # lsp-plugins é o que faz o equalizador funcionar
 ```
-- Autostart já está no `hyprland.lua` (`easyeffects --service-mode`, no-op se não instalado).
+- Autostart já está no `conf/autostart.lua` (`easyeffects --service-mode`, no-op se não instalado).
 - Não existe EQ público pro Quantum 360 Wireless especificamente. `common/easyeffects/` traz 3 presets (instalados pelo `bootstrap.sh` em `~/.local/share/easyeffects/output/`), troca com `easyeffects -l <nome>`:
   - **`JBL-Quantum-800-AutoEq`** — AutoEq do Quantum 800 (irmão mais próximo: wireless, mesma família de driver). É o padrão ativo.
   - **`JBL-Quantum-400-AutoEq`** — AutoEq do Quantum 400 (mais grave, shelf de +18 dB — pode ficar bumbo).
@@ -115,7 +115,10 @@ sudo modprobe -r ideapad_laptop && sudo modprobe ideapad_laptop   # ou reboot
 | Ícone de rede/bluetooth sumiu da tray | App de autostart crashou (segfault real, não falta de exec-once) | `systemctl --user status 'app-nm\x2dapplet@autostart.service'` — deve reiniciar sozinho e notificar |
 | Touchpad não responde | Fn+F10 (toggle de hardware, não é bug de software) | Aperta Fn+F10 de novo |
 | Print (PRTSC) não vai pra área de transferência | `wl-clipboard` não instalado | `sudo pacman -S wl-clipboard` |
-| Janela flutuante (`SUPER+V`/`SUPER+F`) sai da tela em vez de aparecer | Cálculo de posição em pixel físico num monitor com scale ≠ 1 | Já corrigido em `hyprland.lua` (divide por `mon.scale`); só relevante se mexer nesse bind |
+| Janela flutuante (`SUPER+V`/`SUPER+F`) sai da tela em vez de aparecer | Cálculo de posição em pixel físico num monitor com scale ≠ 1 | Já corrigido em `conf/binds.lua` (divide por `mon.scale` e soma `mon.x`/`mon.y` — antes, no AOC, ia parar no LG); só relevante se mexer nesse bind |
+| Diálogo/seletor de arquivo/senha do polkit abre sem foco (digita na janela de trás) | Regra `no_initial_focus` em todas as janelas (removida) | Já corrigido — não recolocar regra global `class = ".*"` com foco/centro (ver `conf/rules.lua`) |
+| Dolphin com "Abrir com" vazio, visual estranho ou sem miniatura de vídeo/PDF | Fora do Plasma faltam menu XDG, tema Qt e thumbnailers | Pacotes `archlinux-xdg-menu qt6ct breeze ffmpegthumbs kdegraphics-thumbnailers` + `XDG_MENU_PREFIX=arch-` e `QT_QPA_PLATFORMTHEME=qt6ct` em `common/uwsm/env-hyprland` (logout/login) |
+| Notificações somem / `swaync.service` em failed | swaync subia por `exec_cmd` E pela unidade systemd | Já corrigido — waybar/swaync/hypridle/cliphist são unidades systemd (`bootstrap.sh` habilita) |
 
 ## Pré-requisitos
 
@@ -125,13 +128,15 @@ Testado em Arch Linux. Pacotes necessários:
 sudo pacman -S hyprland uwsm waybar kitty wofi fuzzel grim slurp wl-clipboard \
     brightnessctl wireplumber pavucontrol dolphin btop ttf-jetbrains-mono-nerd \
     python playerctl power-profiles-daemon network-manager-applet blueman swaync \
-    wireless-regdb iw easyeffects lsp-plugins-lv2
+    wireless-regdb iw easyeffects lsp-plugins-lv2 hypridle hyprlock cliphist \
+    archlinux-xdg-menu qt6ct breeze ffmpegthumbs kdegraphics-thumbnailers \
+    yazi ffmpeg 7zip jq poppler fd ripgrep fzf zoxide resvg imagemagick
 
 # rofi com suporte a Wayland
 sudo pacman -S rofi-wayland
 ```
 
-`python` é usado pelo `show-keybinds.sh` (o popup de atalhos lê os binds direto do `hyprland.lua`).
+`python` é usado pelo `show-keybinds.sh` (o popup de atalhos lê os binds direto do `conf/binds.lua`).
 
 Apps referenciados nos binds que não vêm do repositório oficial (instale via AUR com `yay`/`paru` se quiser tudo funcionando, ou ajuste os binds em `hyprland.lua`):
 
@@ -162,6 +167,7 @@ não aplica sozinho — ele imprime o comando:
 
 ```bash
 sudo cp ~/dotfiles/common/system/modprobe.d/*.conf /etc/modprobe.d/
+sudo mkdir -p /etc/sddm.conf.d && sudo cp ~/dotfiles/common/system/sddm.conf.d/*.conf /etc/sddm.conf.d/   # Num Lock no login
 ```
 
 <details><summary>o que o bootstrap.sh faz, passo a passo</summary>
@@ -185,9 +191,20 @@ ln -sfn ~/.config/hypr/scripts/nvidia-offload.sh ~/.local/bin/nvidia-offload
 ```
 common/
 ├── hypr/
-│   ├── hyprland.lua          # config principal do Hyprland (única fonte dos binds)
-│   └── scripts/              # power-menu, screenshot, popup de atalhos, nvidia-offload
+│   ├── hyprland.lua          # entrada: só faz require dos módulos de conf/
+│   ├── conf/
+│   │   ├── monitors.lua      # monitores multi-host + workspaces por monitor
+│   │   ├── autostart.lua     # polkit, easyeffects, env vars
+│   │   ├── look.lua          # gaps, bordas, animações, layouts, misc
+│   │   ├── input.lua         # teclado us/intl, mouse, touchpad, gestos
+│   │   ├── binds.lua         # atalhos (única fonte — lido pelo popup da Waybar)
+│   │   └── rules.lua         # regras de janela (flutuantes, PiP, utilitários)
+│   ├── hypridle.conf         # bloqueia em 10min, desliga tela em 11min (sem suspender)
+│   ├── hyprlock.conf         # tela de bloqueio (SUPER+L)
+│   └── scripts/              # power-menu, screenshot, popup de atalhos, clipboard, nvidia-offload
 ├── kitty/kitty.conf
+├── qt6ct/qt6ct.conf          # tema dos apps Qt (Dolphin): estilo Breeze + ícones breeze
+├── fish/functions/y.fish     # `y`: abre o yazi e faz cd pra pasta onde você saiu
 ├── rofi/config.rasi
 ├── fuzzel/fuzzel.ini          # launcher de apps (SUPER + Space)
 ├── uwsm/

@@ -22,3 +22,12 @@ if [ -e "$_gpu_card" ]; then
     export AQ_DRM_DEVICES=$(readlink -f "$_gpu_card")
 fi
 unset _gpu_card PRIMARY_GPU_PCI
+
+# DOLPHIN / APPS KDE FORA DO PLASMA
+# XDG_MENU_PREFIX: o UWSM define "hyprland-", mas não existe hyprland-applications.menu
+# em /etc/xdg/menus — sem menu, o "Abrir com" do Dolphin fica vazio/esquece a escolha.
+# O pacote archlinux-xdg-menu instala arch-applications.menu. Este arquivo é lido DEPOIS
+# do prepare-env do UWSM, então o valor daqui vence. (Depois de mudar: kbuildsycoca6.)
+export XDG_MENU_PREFIX=arch-
+# Tema dos apps Qt (estilo Breeze + ícones) vem do qt6ct — config em common/qt6ct/.
+export QT_QPA_PLATFORMTHEME=qt6ct

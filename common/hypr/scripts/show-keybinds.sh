@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-# Le os hl.bind(...) direto do hyprland.lua e mostra num popup do wofi.
-# hyprland.lua e a unica fonte de verdade para os binds (nao ha .conf duplicado).
+# Le os hl.bind(...) direto do conf/binds.lua e mostra num popup do wofi.
+# conf/binds.lua e a unica fonte de verdade para os binds (nao ha .conf duplicado).
 import os
 import re
 
-HYPR_LUA = os.path.expanduser("~/.config/hypr/hyprland.lua")
+HYPR_LUA = os.path.expanduser("~/.config/hypr/conf/binds.lua")
 STYLE = os.path.expanduser("~/.config/hypr/scripts/keybinds-style.css")
 
-SECTION_START = "KEYBINDINGS ----"
-SECTION_END = "WINDOWS AND WORKSPACES ----"
 
 ACTION_LABELS = {
     "window.close": "fechar janela",
@@ -17,6 +15,19 @@ ACTION_LABELS = {
     "window.drag": "mover janela (mouse)",
     "window.resize": "redimensionar janela (mouse)",
     "window.float": "alternar flutuante",
+    "window.fullscreen": "tela cheia",
+    "window.pin": "fixar flutuante em todos os workspaces",
+}
+
+# Binds feitos com function() anonima nao tem dispatcher pra ler: rotulo pela tecla.
+KEY_LABELS = {
+    "SUPER + F": "modo PIP (flutua, encolhe pro canto e fixa)",
+    "ALT + TAB": "alternar janelas (traz pra frente)",
+}
+
+# Funcoes locais do binds.lua que retornam um bind: nome -> rotulo (com o 1o argumento).
+LOCAL_FN_LABELS = {
+    "moveOrSwap": "mover janela: {}",
 }
 
 
@@ -104,6 +115,9 @@ def humanize_action(expr, var_defs=None):
     expr = expr.strip()
     m = re.match(r"hl\.dsp\.([\w.]+)\((.*)\)$", expr, re.S)
     if not m:
+        lf = re.match(r'(\w+)\(\s*"(\w+)"', expr)
+        if lf and lf.group(1) in LOCAL_FN_LABELS:
+            return LOCAL_FN_LABELS[lf.group(1)].format(lf.group(2))
         return expr
     fn, arg = m.group(1), m.group(2).strip()
 
@@ -139,6 +153,9 @@ def humanize_action(expr, var_defs=None):
         if w:
             return f"mover janela para workspace {w.group(1).strip(chr(34))}"
 
+    if fn == "window.resize" and "relative" in arg:
+        return "redimensionar janela (teclado)"
+
     return ACTION_LABELS.get(fn, expr)
 
 
@@ -149,10 +166,11 @@ def main():
         name: value
         for name, value in re.findall(r'local\s+(\w+)\s*=\s*"([^"]*)"', text)
     }
+    # local x = os.getenv("HOME") .. "/caminho"  ->  "~/caminho"
+    for name, value in re.findall(r'local\s+(\w+)\s*=\s*os\.getenv\("HOME"\)\s*\.\.\s*"([^"]*)"', text):
+        var_defs[name] = "~" + value
 
-    start = text.index(SECTION_START)
-    end = text.index(SECTION_END, start)
-    section = text[start:end]
+    section = text
 
     # A workspace loop (mainMod/SHIFT + 1..0) is generated dynamically and has
     # no literal key names to parse, so it's summarized separately below.
@@ -171,7 +189,11 @@ def main():
         args = split_top_level(inner[0])
         if len(args) < 2:
             continue
-        entries.append((humanize_key(args[0]), humanize_action(args[1], var_defs)))
+        key = humanize_key(args[0])
+        if args[1].startswith("function"):
+            entries.append((key, KEY_LABELS.get(key, "acao customizada (ver binds.lua)")))
+        else:
+            entries.append((key, humanize_action(args[1], var_defs)))
 
     if loop_match:
         entries.append(("SUPER + [0-9]", "ir para workspace 1-10"))

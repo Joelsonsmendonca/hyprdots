@@ -12,7 +12,10 @@ aqui mostra o que mudou de verdade.
 ## Hyprland config é Lua, não `.conf`
 
 `common/hypr/hyprland.lua` usa a API `hl.*` (hyprlang com binding Lua), não a sintaxe clássica
-`bind = ...`. Referência completa da API (todos os namespaces `hl.dsp.*`, tipos de retorno,
+`bind = ...`. Ele só faz `require` dos módulos em `common/hypr/conf/` (monitors, autostart, look,
+input, binds, rules); cada `require` é um escopo Lua isolado (erro num não derruba os outros,
+mas `local` de um arquivo não existe nos outros). `hyprland.lua` antigo, num arquivo só, está
+no histórico do git. Referência completa da API (todos os namespaces `hl.dsp.*`, tipos de retorno,
 campos de `HL.Window`/`HL.Monitor`) fica em `/usr/share/hypr/stubs/hl.meta.lua` no sistema —
 lê esse arquivo antes de adivinhar assinatura de função.
 
@@ -29,7 +32,8 @@ verdade — então precisa ser uma expressão Lua válida (prefixo `hl.dsp.` com
 `width`/`height` em pixels **físicos**. `hl.dsp.window.move`/`resize` trabalham em coordenadas
 **lógicas** (físico / `scale`). Em qualquer monitor com scale ≠ 1, dividir por `mon.scale` antes
 de calcular posição — já mordemos essa (janela ia parar fora da tela, ver histórico do PIP em
-`hyprland.lua`).
+`conf/binds.lua`). E `move({x, y})` é coordenada **global**: somar `mon.x`/`mon.y` (senão no AOC,
+em `3440x0`, a janela ia pro LG).
 
 **Antes de confiar em qualquer teste feito por `hyprctl dispatch` neste ambiente**, tirar um
 `grim` e checar visualmente — já aconteceu do estado reportado por `hyprctl activewindow -j`
@@ -58,7 +62,7 @@ via Wayland puro, sem dispatch de texto) com `"sort-by": "number"`.
 
 ## Monitores: multi-host numa config só
 
-`common/hypr/hyprland.lua` (seção MONITORS) usa **regra genérica `output=""` + regras
+`common/hypr/conf/monitors.lua` usa **regra genérica `output=""` + regras
 `desc:` específicas**. Regra cujo output não está conectado é ignorada sem erro, então o
 mesmo arquivo cobre: notebook sozinho, notebook + projetor da facul (genérica liga
 estendido; `SUPER+SHIFT+P` → `scripts/mirror-toggle.sh` alterna espelhamento), e o
@@ -84,7 +88,7 @@ desktop de casa (LG UltraWide `desc:LG Electronics LG ULTRAWIDE` à esquerda/pri
 
 ## Teclado
 
-Físico é **ANSI/US** (não ABNT2). `hyprland.lua` usa `kb_layout = "us"`,
+Físico é **ANSI/US** (não ABNT2). `conf/input.lua` usa `kb_layout = "us"`,
 `kb_variant = "intl"` (US Internacional com dead keys — igual ao ´ do ABNT2): `'`+vogal =
 acento agudo, `'`+c = ç, `~`+a/o/n = til, `^`+vogal = circunflexo, `` ` ``+vogal = crase,
 `"`+vogal = trema. `'` `"` `~` `^` `` ` `` literais: tecla + espaço. AltGr+, também dá ç.
@@ -120,9 +124,30 @@ autostart" — checar antes de mexer em `hyprland.lua`.
 via prefix-matching do systemd — é assim que o UWSM injeta `slice-tweak.conf` em todo mundo, e
 é onde `common/systemd/user/app-@autostart.service.d/99-crash-notify.conf` vive.
 
+**Waybar, swaync, hypridle e cliphist são unidades systemd --user habilitadas**
+(`WantedBy=graphical-session.target`; `bootstrap.sh` faz o `enable`). NÃO subir por
+`hl.exec_cmd` também — o swaync rodava em dobro e `swaync.service` ficava em `failed`
+("already running"). O que sobra no `conf/autostart.lua` (polkit-kde, easyeffects) vai por
+`uwsm app -- <cmd>`. Pra reiniciar: `systemctl --user restart waybar`.
+
 **Dentro desse drop-in compartilhado, `%i` colide** (resolve sempre pra `"autostart"`, igual
 pra todo app — não dá pra distinguir quem falhou). Usar `%p` (prefixo, ex. `app-blueman`) pra
 qualquer coisa que precise saber QUAL app disparou o `OnFailure=`/gatilho.
+
+## Janelas flutuantes: regras que NÃO devem voltar
+
+Em `conf/rules.lua` (comentado lá também):
+- **`no_initial_focus` em `class = ".*"`** — nenhuma janela nova ganhava foco: diálogo de
+  salvar/abrir, seletor de arquivo e prompt de senha do polkit abriam com o teclado na janela
+  de trás. Se um app específico roubar foco, regra só pra ele.
+- **`center = true` em `float = true`** — centralizava todo diálogo no monitor (no UltraWide
+  ficava longe da janela-mãe) e anulava o `move` do hyprland-run (última regra vence). O
+  Hyprland já centraliza flutuante nova por padrão.
+- `ALT+TAB` precisa de `bring_to_top()` depois do `cycle_next()`, senão foca uma flutuante
+  escondida atrás de outra (exemplo do próprio wiki de dispatchers).
+- **Testando foco por `hyprctl` com o usuário mexendo no mouse**: `follow_mouse = 1` faz o
+  foco voltar pra janela sob o cursor a cada movimento/clique — o evento `activewindow>>` no
+  socket2 logo após `openwindow>>` é o que prova que a janela ganhou foco ao abrir.
 
 ## Achados de troubleshooting (não redescobrir)
 
@@ -143,7 +168,7 @@ qualquer coisa que precise saber QUAL app disparou o `OnFailure=`/gatilho.
   já checado: sink em `S16LE 48000 2ch`, sem resample, sem downmix, profile `analog-stereo`,
   formato negociado limpo. É o timbre cru do headset (JBL afina escuro e conta com o EQ do
   QuantumENGINE, que só existe no Windows). **Resolvido** com EasyEffects 8:
-  - Autostart: `easyeffects --service-mode` no `hyprland.lua` (`--gapplication-service` é
+  - Autostart: `easyeffects --service-mode` no `conf/autostart.lua` (`--gapplication-service` é
     deprecado no EE8). No-op se o pacote não existir. Precisa de `lsp-plugins-lv2` pro
     equalizador funcionar (dep OPCIONAL do easyeffects — instalar à mão).
   - Presets em `common/easyeffects/*.json` (formato EE7, o EE8 lê sem reclamar). Symlinkados
@@ -156,6 +181,15 @@ qualquer coisa que precise saber QUAL app disparou o `OnFailure=`/gatilho.
   - EE8 reaplica o último preset de saída sozinho no start; `easyeffects -l <nome>` recarrega
     na mão, `easyeffects -s` mostra o ativo.
   - Não perder tempo procurando problema no PipeWire de novo.
+- **Dolphin "estranho" no Hyprland** (resolvido): "Abrir com" vazio porque o UWSM define
+  `XDG_MENU_PREFIX=hyprland-` e não existe `hyprland-applications.menu` — `env-hyprland`
+  sobrescreve pra `arch-` (pacote `archlinux-xdg-menu`; o env-file é lido DEPOIS do
+  prepare-env do UWSM, então vence). Tema via `QT_QPA_PLATFORMTHEME=qt6ct` +
+  `common/qt6ct/qt6ct.conf` (Breeze). Miniaturas: `ffmpegthumbs`, `kdegraphics-thumbnailers`.
+  `inode/directory` estava com `kitty-open.desktop`; agora `org.kde.dolphin.desktop`.
+  Flea foi avaliado e descartado: o `flea-bin` do AUR depende do pacote `omarchy`.
+- **yazi** instalado (gerenciador no terminal, wrapper `y` em `common/fish/functions/y.fish`).
+  Sem keybind por escolha do usuário.
 - **Scroll no ícone de volume da Waybar não fazia nada**: `pulseaudio` module chamava
   `pamixer` (não instalado). Trocado pelo scroll nativo do Waybar (libpulse). As teclas de
   volume usam `wpctl` — ambos batem no mesmo sink default agora. `pamixer` continua fora;
