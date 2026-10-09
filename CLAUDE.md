@@ -216,6 +216,14 @@ módulo de IA com um chip por provedor + Central A do swaync + pop-ups.
   Flea foi avaliado e descartado: o `flea-bin` do AUR depende do pacote `omarchy`.
 - **yazi** instalado (gerenciador no terminal, wrapper `y` em `common/fish/functions/y.fish`).
   Sem keybind por escolha do usuário.
+- **Wallpaper (Linux Wallpaper Engine) às vezes não aparecia no login**: corrida. A interface
+  (Electron, autostart) sobe 0,02-0,3s depois do Hyprland e restaura o último wallpaper com
+  `linux-wallpaperengine --screen-root DP-3`; se a saída ainda não existe, o renderizador sai
+  com "Cannot continue" (exit 1) e a interface NÃO tenta de novo. Fix: drop-in
+  `common/systemd/user/app-Linux\x20Wallpaper\x20Engine@autostart.service.d/override.conf`
+  com `ExecStartPre=` → `hypr/scripts/wait-for-monitors.sh` (espera monitor no `hyprctl` + 2s).
+  A interface também não sai limpo no SIGTERM (logout): é morta após 5s e o coredump ILL
+  dispara o crash-notify — barulho conhecido, não é bug novo.
 - **Scroll no ícone de volume da Waybar não fazia nada**: `pulseaudio` module chamava
   `pamixer` (não instalado). Trocado pelo scroll nativo do Waybar (libpulse). As teclas de
   volume usam `wpctl` — ambos batem no mesmo sink default agora. `pamixer` continua fora;
