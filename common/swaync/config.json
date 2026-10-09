@@ -6,11 +6,13 @@
     "control-center-margin-bottom": 8,
     "control-center-margin-right": 8,
     "control-center-width": 400,
+    "fit-to-screen": false,
+    "control-center-height": -1,
     "notification-window-width": 400,
     "timeout": 5,
     "timeout-low": 5,
-    "timeout-critical": 8,
-    "notification-icon-size": 48,
+    "timeout-critical": 0,
+    "notification-icon-size": 40,
     "notification-body-image-height": 100,
     "notification-body-image-width": 200,
     "keyboard-shortcuts": true,
@@ -18,20 +20,66 @@
     "transition-time": 200,
     "hide-on-clear": false,
     "hide-on-action": true,
+    "relative-timestamps": true,
+    "notification-grouping": true,
+    "text-empty": "Tudo em dia",
     "script-fail-notify": true,
     "widgets": [
+        "buttons-grid",
+        "volume",
+        "mpris",
         "title",
-        "dnd",
         "notifications"
     ],
     "widget-config": {
+        "buttons-grid": {
+            "buttons-per-row": 3,
+            "actions": [
+                {
+                    "label": "󰖩\nWi-Fi",
+                    "type": "toggle",
+                    "command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh wifi'",
+                    "update-command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh wifi status'"
+                },
+                {
+                    "label": "󰂯\nBluetooth",
+                    "type": "toggle",
+                    "command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh bt'",
+                    "update-command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh bt status'"
+                },
+                {
+                    "label": "󰽥\nNão perturbe",
+                    "type": "toggle",
+                    "command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh dnd'",
+                    "update-command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh dnd status'"
+                },
+                {
+                    "label": "󰅶\nNão dormir",
+                    "type": "toggle",
+                    "command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh awake'",
+                    "update-command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh awake status'"
+                },
+                {
+                    "label": "󰹑\nPrint área",
+                    "command": "sh -c 'swaync-client -cp; sleep 0.4; $HOME/.config/hypr/scripts/screenshot_area_clipboard.sh'"
+                },
+                {
+                    "label": "󰍹\nEspelhar",
+                    "command": "sh -c 'swaync-client -cp; $HOME/.config/hypr/scripts/mirror-toggle.sh'"
+                }
+            ]
+        },
+        "volume": {
+            "label": "󰕾"
+        },
+        "mpris": {
+            "show-album-art": "when-available",
+            "autohide": true
+        },
         "title": {
             "text": "Notificações",
             "clear-all-button": true,
             "button-text": "Limpar tudo"
-        },
-        "dnd": {
-            "text": "Não perturbe"
         }
     }
 }

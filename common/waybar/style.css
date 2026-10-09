@@ -1,110 +1,199 @@
+/* Layout "ilhas" (barra A do canvas "Waybar Redesign"), paleta Tokyo Night.
+ * A janela da barra é transparente; cada ilha é um módulo ou um group/<nome>
+ * (o group vira #<nome> no CSS) com fundo e borda próprios. */
+
+@define-color bg      #1a1b26;
+@define-color surface #24283b;
+@define-color line    #2a2e45;
+@define-color fg      #c0caf5;
+@define-color dim     #a9b1d6;
+@define-color muted   #565f89;
+@define-color accent  #7aa2f7;
+@define-color red     #f7768e;
+@define-color yellow  #e0af68;
+@define-color green   #9ece6a;
+
 * {
     font-family: "JetBrainsMono Nerd Font Mono", sans-serif;
     font-size: 13px;
+    min-height: 0;
 }
 
 window#waybar {
-    background-color: rgba(26, 27, 38, 0.9);
-    color: #c0caf5;
-    border-radius: 10px;
+    background: transparent;
+    color: @fg;
 }
 
+/* --- ilhas --- */
+#workspaces,
+#window,
 #clock,
-#battery,
-#tray,
-#custom-keybinds,
-#custom-power,
-#idle_inhibitor,
-#pulseaudio,
-#backlight,
-#cpu,
-#memory {
-    padding: 0 10px;
-    margin: 4px 2px;
+#sys,
+#ai,
+#notif,
+#extras,
+#custom-power {
+    background-color: alpha(@bg, 0.95);
+    border: 1px solid @line;
+    border-radius: 12px;
+}
+
+/* módulos dentro das ilhas */
+#cpu, #memory, #backlight, #battery, #pulseaudio {
+    padding: 0 8px;
+    color: @dim;
+}
+#cpu { padding-left: 14px; }
+#pulseaudio { padding-right: 14px; }
+
+/* --- workspaces --- */
+#workspaces {
+    padding: 0 4px;
 }
 
 #workspaces button {
-    padding: 0 6px;
-    color: #c0caf5;
-}
-
-#workspaces button.active {
-    background-color: #414868;
+    all: unset;
+    padding: 0 10px;
+    margin: 4px 1px;
     border-radius: 8px;
-    color: #7aa2f7;
+    color: @dim;
 }
 
 #workspaces button:hover {
-    background-color: rgba(65, 72, 104, 0.5);
-    border-radius: 8px;
+    background-color: @surface;
+}
+
+#workspaces button.active {
+    background-color: @accent;
+    color: #16161e;
+    font-weight: bold;
+    padding: 0 14px;
 }
 
 #workspaces button.urgent {
-    color: #f7768e;
-}
-
-#window {
-    color: #a9b1d6;
-    font-style: italic;
-}
-
-#custom-keybinds {
-    color: #e0af68;
+    color: @red;
     font-weight: bold;
 }
 
-#custom-keybinds:hover {
-    background-color: rgba(65, 72, 104, 0.4);
-    border-radius: 8px;
+/* --- título da janela --- */
+#window {
+    padding: 0 14px;
+    color: @dim;
 }
 
+/* sem janela no workspace: a ilha some */
+window#waybar.empty #window {
+    background-color: transparent;
+    border-color: transparent;
+    padding: 0;
+}
+
+/* --- relógio --- */
+#clock {
+    padding: 0 16px;
+    font-weight: bold;
+}
+
+/* --- IA: um chip por provedor --- */
+#ai {
+    padding: 0 4px;
+}
+
+#custom-ai-cld,
+#custom-ai-ag {
+    margin: 5px 3px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+#custom-ai-cld {
+    background-color: #3b2e1c;
+    color: @yellow;
+}
+
+#custom-ai-ag {
+    background-color: #1c2a3b;
+    color: #7dcfff;
+}
+
+#custom-ai-cld.error,
+#custom-ai-ag.error {
+    background-color: #2d1f2b;
+    color: @red;
+}
+
+/* --- notificações: sino + pílula com a contagem --- */
+#custom-notification {
+    padding: 0 12px;
+    font-size: 15px;
+    color: @fg;
+}
+
+#custom-notification.dnd-none,
+#custom-notification.dnd-notification,
+#custom-notification.dnd-inhibited-none,
+#custom-notification.dnd-inhibited-notification {
+    color: @muted;
+}
+
+#custom-notif-count {
+    margin: 8px 8px 8px 0;
+    padding: 0 6px;
+    border-radius: 9px;
+    background-color: @red;
+    color: #16161e;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* --- bandeja + atalhos + update --- */
+#extras {
+    padding: 0 6px 0 12px;
+}
+
+#custom-keybinds,
+#custom-update {
+    padding: 0 8px;
+    color: @dim;
+    font-size: 15px;
+}
+
+#custom-update {
+    color: @accent;
+}
+
+#custom-keybinds:hover,
+#custom-update:hover {
+    color: @fg;
+}
+
+/* --- energia --- */
 #custom-power {
-    color: #f7768e;
+    padding: 0 14px;
+    color: @red;
+    font-size: 15px;
 }
 
 #custom-power:hover {
-    background-color: rgba(247, 118, 142, 0.2);
-    border-radius: 8px;
+    background-color: alpha(@red, 0.15);
 }
 
-#idle_inhibitor.activated {
-    color: #e0af68;
+/* --- estados --- */
+#pulseaudio.muted { color: @muted; }
+#battery.warning  { color: @yellow; }
+#battery.critical { color: @red; }
+#battery.charging { color: @green; }
+
+/* --- tooltip (o da IA é monoespaçado e alinhado por colunas) --- */
+tooltip {
+    background-color: @bg;
+    border: 1px solid #414868;
+    border-radius: 12px;
 }
 
-#pulseaudio.muted {
-    color: #565f89;
+tooltip label {
+    color: @fg;
+    padding: 6px 4px;
+    font-family: "JetBrainsMono Nerd Font Mono", monospace;
 }
-
-#battery.warning {
-    color: #e0af68;
-}
-
-#battery.critical {
-    color: #f7768e;
-}
-
-#battery.charging {
-    color: #9ece6a;
-}
-
-#custom-notification {
-    color: #c0caf5;
-}
-
-#custom-notification.notification,
-#custom-notification.dnd-notification {
-    color: #f7768e;
-}
-
-#custom-aibar {
-    padding: 0 10px;
-    margin: 4px 2px;
-    color: #7aa2f7;
-    font-weight: bold;
-}
-
-#custom-aibar:hover {
-    background-color: rgba(65, 72, 104, 0.4);
-    border-radius: 8px;
-}
-

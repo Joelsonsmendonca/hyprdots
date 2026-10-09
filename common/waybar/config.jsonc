@@ -1,96 +1,110 @@
 {
-    // Posição da barra (top, bottom, left, right)
+    // Layout "ilhas": barra transparente, cada grupo de módulos é uma ilha
+    // arredondada (fundo/borda em style.css). Desenho escolhido no canvas
+    // "Waybar Redesign" (barra A + módulo de IA com vários provedores).
     "layer": "top",
     "position": "top",
-    "height": 40, // Altura da barra
-    "spacing": 4, // Espaçamento entre módulos
+    "height": 36,
+    "margin-top": 8,
+    "margin-left": 8,
+    "margin-right": 8,
+    "spacing": 8, // espaço entre ilhas
 
-    // Módulos da Esquerda
     "modules-left": [
         "ext/workspaces",
         "hyprland/window"
     ],
 
-    // Módulos do Centro
     "modules-center": [
         "clock"
     ],
 
-    // Módulos da Direita
     // battery e backlight somem sozinhos se o hardware nao existir
     // (comportamento nativo do waybar) -- por isso o mesmo arquivo serve pro PC e pro notebook
-    // bluetooth agora é o ícone do blueman-applet na tray (igual o nm-applet faz pro wifi)
     "modules-right": [
-        "custom/keybinds",
-        "idle_inhibitor",
-        "backlight",
-        "cpu",
-        "memory",
-        "battery",
-        "pulseaudio",
-        "custom/notification",
-        "custom/aibar",
-        "custom/update",
-        "tray",
+        "group/sys",
+        "group/ai",
+        "group/notif",
+        "group/extras",
         "custom/power"
     ],
 
-    // --- Configurações Detalhadas dos Módulos ---
+    // --- Ilhas (grupos) ---
+
+    "group/sys": {
+        "orientation": "horizontal",
+        "modules": ["cpu", "memory", "backlight", "battery", "pulseaudio"]
+    },
+
+    // Um chip por provedor de IA (scripts/ai-usage.py). Provedor desligado no
+    // ai-usagebar some sozinho (texto vazio).
+    "group/ai": {
+        "orientation": "horizontal",
+        "modules": ["custom/ai-cld", "custom/ai-ag"]
+    },
+
+    "group/notif": {
+        "orientation": "horizontal",
+        "modules": ["custom/notification", "custom/notif-count"]
+    },
+
+    "group/extras": {
+        "orientation": "horizontal",
+        "modules": ["tray", "custom/keybinds", "custom/update"]
+    },
+
+    // --- Módulos ---
 
     // Usamos ext/workspaces (protocolo ext-workspace-v1), NAO hyprland/workspaces.
     // Motivo: a config do Hyprland e Lua, e nesse modo o servidor rejeita os
     // dispatches em texto ("dispatch workspace 5" -> erro de sintaxe Lua). O
     // hyprland/workspaces clica mandando exatamente esse texto, entao clicar nao
     // faz nada. O ext/workspaces ativa o workspace pelo protocolo Wayland direto.
+    // Só aparecem workspaces que existem: os vazios somem porque as regras em
+    // hypr/conf/monitors.lua NÃO são persistent (o ext/workspaces não tem classe
+    // CSS pra "vazio", então esconder pelo CSS não dá).
     "ext/workspaces": {
-        "format": "{icon} {name}",
+        "format": "{name}",
         "sort-by": "number",
-        "format-icons": {
-            "default": "",
-            "urgent": "",
-            "active": ""
-        },
         // all-outputs=false (padrão): cada barra mostra só os workspaces do SEU monitor.
-        // Os workspaces fixos são definidos no hyprland.lua (workspace_rule persistent),
-        // então no desktop a barra do LG mostra 1-5 e a do AOC mostra 6-10 sozinhas.
-        "all-outputs": false
+        "all-outputs": false,
+        // Clique: ext/workspaces ativa pelo protocolo (padrão "activate").
+        // Rolagem: hyprctl na forma Lua (dispatch em texto clássico morre no parser
+        // Lua). m+1/m-1 = próximo/anterior que existe NESTE monitor. É instantâneo
+        // (~0,1s); a rolagem lenta antiga do ai-usagebar era porque ele ia na rede.
+        "on-scroll-up": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"m-1\" })'",
+        "on-scroll-down": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"m+1\" })'"
     },
 
     "hyprland/window": {
-        "format": "{}",
-        "max-length": 35
+        "format": "<span foreground='#7aa2f7' font_weight='bold'>{class}</span>  <span foreground='#565f89'>·</span>  {title}",
+        "max-length": 60,
+        "separate-outputs": true
     },
 
     "clock": {
-        "format": " {:%H:%M}",
-        "format-alt": " {:%d/%m/%Y}",
+        // Data em português: precisa do "locale" E do "L" no começo do formato (o fmt
+        // só usa o locale em chrono com o especificador L; sem ele sai "Fri, 09 Oct").
+        "locale": "pt_BR.UTF-8",
+        "format": "{:L%H:%M  <span foreground='#565f89' font_weight='normal'>%a, %d %b</span>}",
         "tooltip-format": "<big>{:%A, %d de %B de %Y}</big>\n<tt><small>{calendar}</small></tt>"
     },
 
-    "idle_inhibitor": {
-        "format": "{icon}",
-        "format-icons": {
-            "activated": "",
-            "deactivated": ""
-        },
-        "tooltip": true
-    },
-
-    "backlight": {
-        "format": " {percent}%",
-        "on-scroll-up": "brightnessctl set 5%+",
-        "on-scroll-down": "brightnessctl set 5%-"
-    },
-
     "cpu": {
-        "format": " {usage}%",
+        "format": "<span foreground='#7dcfff'>󰻠</span> {usage}%",
         "tooltip": true,
         "on-click": "kitty btop"
     },
 
     "memory": {
-        "format": " {used:0.1f}G",
+        "format": "<span foreground='#bb9af7'>󰍛</span> {used:0.1f}G",
         "tooltip": true
+    },
+
+    "backlight": {
+        "format": "<span foreground='#e0af68'>󰃠</span> {percent}%",
+        "on-scroll-up": "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-"
     },
 
     "battery": {
@@ -99,15 +113,15 @@
             "critical": 15
         },
         "format": "{icon} {capacity}%",
-        "format-icons": ["", "", "", "", ""],
-        "format-charging": " {capacity}%",
-        "format-plugged": " {capacity}%",
+        "format-icons": ["󰁺", "󰁼", "󰁾", "󰂀", "󰁹"],
+        "format-charging": "󰂄 {capacity}%",
+        "format-plugged": "󰂄 {capacity}%",
         "tooltip-format": "{timeTo}"
     },
 
     "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-muted": " Mudo",
+        "format": "<span foreground='#9ece6a'>{icon}</span> {volume}%",
+        "format-muted": "<span foreground='#565f89'>󰖁</span> mudo",
         // Scroll usa o controle NATIVO do waybar (libpulse -> mesmo sink default
         // das teclas de volume via wpctl). Antes chamava `pamixer`, que NAO esta
         // instalado -> rolar o icone nao fazia nada e parecia "outro sistema".
@@ -117,24 +131,48 @@
         "on-click": "pavucontrol",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
         "format-icons": {
-            "default": ["", ""]
+            "default": ["󰕿", "󰖀", "󰕾"]
         }
     },
 
-    "tray": {
-        "icon-size": 18,
-        "spacing": 10
-    },
-
-    "custom/keybinds": {
-        "format": "",
-        "tooltip-format": "Ver atalhos do Hyprland",
-        "on-click": "~/.config/hypr/scripts/show-keybinds.sh"
-    },
-
-    "custom/notification": {
+    "custom/ai-cld": {
+        "exec": "~/.config/waybar/scripts/ai-usage.py anthropic",
+        "return-type": "json",
+        "interval": 300,
+        "signal": 13,
         "tooltip": true,
-        "format": "🔔 {}",
+        // clique abre o Claude Code num kitty novo (caminho completo: o PATH da
+        // unidade systemd da waybar pode não ter ~/.local/bin); direito = painel de uso
+        "on-click": "kitty --title 'Claude Code' --directory ~ $HOME/.local/bin/claude",
+        "on-click-right": "ai-usagebar-tui"
+    },
+
+    "custom/ai-ag": {
+        "exec": "~/.config/waybar/scripts/ai-usage.py antigravity",
+        "return-type": "json",
+        "interval": 300,
+        "signal": 13,
+        "tooltip": true,
+        // clique abre o agy (CLI do Antigravity); direito = painel de uso
+        "on-click": "kitty --title 'Antigravity' --directory ~ $HOME/.local/bin/agy",
+        "on-click-right": "ai-usagebar-tui"
+    },
+
+    // Sino + contador separados: o contador é um módulo próprio pra virar uma
+    // pílula vermelha no CSS, e some quando é 0 (texto vazio esconde o módulo).
+    "custom/notification": {
+        "tooltip": false,
+        "format": "{icon}",
+        "format-icons": {
+            "notification": "󰂞",
+            "none": "󰂚",
+            "dnd-notification": "󰂛",
+            "dnd-none": "󰂛",
+            "inhibited-notification": "󰂞",
+            "inhibited-none": "󰂚",
+            "dnd-inhibited-notification": "󰂛",
+            "dnd-inhibited-none": "󰂛"
+        },
         "return-type": "json",
         "exec-if": "which swaync-client",
         "exec": "swaync-client -swb",
@@ -143,26 +181,35 @@
         "escape": true
     },
 
-    "custom/power": {
-        "format": "",
-        "tooltip-format": "Menu de energia",
-        "on-click": "~/.config/hypr/scripts/power-menu.sh"
+    "custom/notif-count": {
+        "tooltip": false,
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb | jq --unbuffered -c '{text: (if .text == \"0\" then \"\" else .text end), class: .class}'",
+        "on-click": "swaync-client -t -sw",
+        "escape": true
+    },
+
+    "tray": {
+        "icon-size": 16,
+        "spacing": 12
+    },
+
+    "custom/keybinds": {
+        "format": "󰌌",
+        "tooltip-format": "Ver atalhos do Hyprland",
+        "on-click": "~/.config/hypr/scripts/show-keybinds.sh"
     },
 
     "custom/update": {
-        "format": " Update",
-        "tooltip-format": "Atualizar Sistema e IA",
+        "format": "󰚰",
+        "tooltip-format": "Atualizar sistema e IA",
         "on-click": "kitty --title 'System Update' bash -c /home/joelson/.local/bin/update-all"
     },
 
-    "custom/aibar": {
-        "exec": "ai-usagebar --format '{vendor_short} {session_pct}% · {session_reset}'",
-        "return-type": "json",
-        "interval": 300,
-        "signal": 13,
-        "tooltip": true,
-        "on-click": "ai-usagebar-tui",
-        "on-scroll-up":   "ai-usagebar --cycle-next",
-        "on-scroll-down": "ai-usagebar --cycle-prev"
+    "custom/power": {
+        "format": "󰐥",
+        "tooltip-format": "Menu de energia",
+        "on-click": "~/.config/hypr/scripts/power-menu.sh"
     }
 }

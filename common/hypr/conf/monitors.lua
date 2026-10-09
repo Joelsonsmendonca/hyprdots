@@ -29,9 +29,12 @@ hl.monitor({ output = "desc:AOC 1970W",                   mode = "1366x768@59.79
 -- Workspaces fixos por monitor no desktop: 1-5 no LG (principal), 6-10 no AOC.
 -- Regra pra monitor não conectado não materializa nada (testado) — no notebook
 -- sozinho os 10 workspaces seguem no eDP normalmente.
+-- SEM `persistent`: workspace vazio deixa de existir, então a Waybar (ext/workspaces,
+-- que não tem classe CSS pra "vazio") mostra só os que têm janela. O vínculo
+-- workspace -> monitor continua valendo quando ele é criado.
 for i = 1, 5 do
-    hl.workspace_rule({ workspace = tostring(i), monitor = "desc:LG Electronics LG ULTRAWIDE", persistent = true })
+    hl.workspace_rule({ workspace = tostring(i), monitor = "desc:LG Electronics LG ULTRAWIDE" })
 end
 for i = 6, 10 do
-    hl.workspace_rule({ workspace = tostring(i), monitor = "desc:AOC 1970W", persistent = true })
+    hl.workspace_rule({ workspace = tostring(i), monitor = "desc:AOC 1970W" })
 end

@@ -83,8 +83,10 @@ desktop de casa (LG UltraWide `desc:LG Electronics LG ULTRAWIDE` à esquerda/pri
   EXPLÍCITO no mesmo `hl.monitor` (só passar mode/position não reativa). Monitor desligado
   aparece em `monitors all` com `disabled: true`.
 - **Workspaces fixos por monitor** (só materializam onde o `desc:` existe): 1-5 no LG,
-  6-10 no AOC, via `hl.workspace_rule({ persistent = true, monitor = "desc:..." })`. No
-  notebook sozinho nenhuma regra casa e os 10 workspaces ficam no eDP como sempre.
+  6-10 no AOC, via `hl.workspace_rule({ monitor = "desc:..." })`. No notebook sozinho
+  nenhuma regra casa e os 10 workspaces ficam no eDP como sempre. **Sem `persistent`** de
+  propósito: o `ext/workspaces` da Waybar não tem classe CSS pra "vazio", então a única
+  forma de a barra mostrar só os workspaces ocupados é eles deixarem de existir vazios.
 
 ## Teclado
 
@@ -148,6 +150,30 @@ Em `conf/rules.lua` (comentado lá também):
 - **Testando foco por `hyprctl` com o usuário mexendo no mouse**: `follow_mouse = 1` faz o
   foco voltar pra janela sob o cursor a cada movimento/clique — o evento `activewindow>>` no
   socket2 logo após `openwindow>>` é o que prova que a janela ganhou foco ao abrir.
+
+## Waybar e swaync (layout "ilhas", out/2026)
+
+Desenho escolhido no canvas "Waybar Redesign" (claude.ai artifact): barra A (ilhas) +
+módulo de IA com um chip por provedor + Central A do swaync + pop-ups.
+- **Ilhas** = `group/<nome>` na config; o CSS pega como `#<nome>` (`#sys`, `#ai`, `#notif`,
+  `#extras`). A janela da barra é transparente.
+- **IA**: `common/waybar/scripts/ai-usage.py <vendor>` lê `ai-usagebar usage --json` com
+  cache de 240s em `$XDG_RUNTIME_DIR/ai-usage.json` (flock: os chips não fazem 2 chamadas de
+  rede). Chip = maior % entre os limites do provedor. Tooltip monoespaçado com barra e
+  marcador de tempo decorrido. Provedor desligado no ai-usagebar some sozinho.
+- **Rolagem nos workspaces**: `on-scroll-*` com `hyprctl dispatch 'hl.dsp.focus({ workspace
+  = "m+1" })'` (forma Lua; ~0,1s). A rolagem antiga do ai-usagebar era lenta por ir na rede.
+- **Relógio em português**: precisa de `"locale"` E do `L` no formato (`{:L%H:%M ...}`); sem
+  o `L` o fmt ignora o locale e sai "Fri, 09 Oct".
+- **Contador de notificações**: módulo separado (`custom/notif-count`, `jq` troca "0" por
+  vazio pra esconder) pra virar pílula no CSS.
+- **swaync 0.12 (GTK4)**: carrega o CSS padrão de `/etc/xdg/swaync/` e o nosso por cima —
+  só sobrescrever variáveis/regras. Botões toggle: lógica em `common/swaync/scripts/toggle.sh`,
+  NUNCA `sh -c` com aspas aninhadas inline (o swaync quebra nos espaços: "EOF inesperado" no
+  journal). Botão ligado = classe `.active` (não só `:checked`).
+- **`bluetoothctl show` sem controlador (desktop) espera PRA SEMPRE** — sempre com `timeout`.
+  E `nmcli radio wifi` diz "enabled" mesmo sem placa (desktop só tem cabo): checar `WIFI-HW`.
+- `idle_inhibitor` saiu da barra: virou o botão "Não dormir" da central (para o hypridle).
 
 ## Achados de troubleshooting (não redescobrir)
 

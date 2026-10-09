@@ -207,11 +207,14 @@ common/
 ├── fish/functions/y.fish     # `y`: abre o yazi e faz cd pra pasta onde você saiu
 ├── rofi/config.rasi
 ├── fuzzel/fuzzel.ini          # launcher de apps (SUPER + Space)
+├── swaync/                   # central de notificações (botões rápidos, volume, player) + pop-ups
+│   └── scripts/toggle.sh     # estado/ação dos botões Wi-Fi, Bluetooth, Não perturbe, Não dormir
 ├── uwsm/
 │   └── env-hyprland          # variáveis pré-login (ex.: qual GPU o Hyprland usa)
-├── waybar/
+├── waybar/                   # layout em "ilhas" (Tokyo Night)
 │   ├── config.jsonc
-│   └── style.css
+│   ├── style.css
+│   └── scripts/ai-usage.py   # chips de uso de IA (CLD, AG) + tooltip
 ├── wofi/
 │   ├── style.css
 │   └── scripts/               # menus custom (sistema, webapps, menu principal)
