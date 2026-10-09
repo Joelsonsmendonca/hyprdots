@@ -4,26 +4,8 @@ primary = "anthropic"
 [anthropic]
 enabled = true
 
-[minimax]
-enabled = true
-api_key = ""
-# region = "global"
-
 [antigravity]
 enabled = true
-
-[[custom]]
-id = "hetzner"
-name = "Hetzner"
-short_name = "htz"
-enabled = false
-url = "https://sua-url-do-hetzner-ou-proxy/api/usage"
-api_key = ""
-
-[[custom.metrics]]
-label = "Uso"
-used = "/usage/requests/used"
-limit = "/usage/requests/limit"
 
 [openai]
 enabled = false
