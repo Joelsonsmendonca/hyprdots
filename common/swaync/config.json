@@ -60,6 +60,12 @@
                     "update-command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh awake status'"
                 },
                 {
+                    "label": "󰂏\nProteger bateria",
+                    "type": "toggle",
+                    "command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh bat'",
+                    "update-command": "sh -c '$HOME/.config/swaync/scripts/toggle.sh bat status'"
+                },
+                {
                     "label": "󰹑\nPrint área",
                     "command": "sh -c 'swaync-client -cp; sleep 0.4; $HOME/.config/hypr/scripts/screenshot_area_clipboard.sh'"
                 },

@@ -43,7 +43,12 @@ systemctl --user enable --now battery-notify.timer 2>/dev/null || true
 # Serviços da sessão gráfica (WantedBy=graphical-session.target, ativado pelo UWSM).
 # NÃO subir estes também por exec_cmd no Hyprland — duas instâncias brigam (swaync
 # morria com "already running").
-systemctl --user enable waybar.service swaync.service hypridle.service cliphist.service 2>/dev/null || true
+# Um por vez: num comando só, UMA unidade faltando (ex.: hypridle não instalado) fazia o
+# enable inteiro falhar em silêncio e nenhuma subia.
+# power-mode = modo de energia do Fn+Q (só notebook; no desktop a unidade não roda).
+for u in waybar swaync hypridle cliphist power-mode; do
+  systemctl --user enable "$u.service" 2>/dev/null || echo "   (pulei $u.service: não instalado?)"
+done
 
 echo "==> Dolphin como gerenciador de pastas + cache de menus KDE"
 # kitty instala kitty-open.desktop e pegava inode/directory ("mostrar na pasta" abria terminal).
@@ -76,6 +81,8 @@ Configs de SISTEMA (sudo, específicas do notebook híbrido AMD+NVIDIA) — se f
     (regdomain de wifi + toggle do touchpad ideapad — ver README)
     sudo mkdir -p /etc/sddm.conf.d && sudo cp $REPO/common/system/sddm.conf.d/*.conf /etc/sddm.conf.d/
     (Num Lock ligado na tela de login)
+    sudo cp $REPO/common/system/udev/rules.d/*.rules /etc/udev/rules.d/ && sudo udevadm control --reload && sudo udevadm trigger -s platform -c add
+    (só notebook Lenovo: botão "Proteger bateria" da central do swaync sem sudo)
 
 Depois: ajuste o endereço PCI da GPU em common/uwsm/env-hyprland e faça logout/login.
 EOF

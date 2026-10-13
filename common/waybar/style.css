@@ -39,7 +39,7 @@ window#waybar {
 }
 
 /* módulos dentro das ilhas */
-#cpu, #memory, #backlight, #battery, #pulseaudio {
+#cpu, #memory, #backlight, #battery, #custom-power-mode, #pulseaudio {
     padding: 0 8px;
     color: @dim;
 }

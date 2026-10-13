@@ -33,7 +33,7 @@
 
     "group/sys": {
         "orientation": "horizontal",
-        "modules": ["cpu", "memory", "backlight", "battery", "pulseaudio"]
+        "modules": ["cpu", "memory", "backlight", "battery", "custom/power-mode", "pulseaudio"]
     },
 
     // Um chip por provedor de IA (scripts/ai-usage.py). Provedor desligado no
@@ -117,6 +117,16 @@
         "format-charging": "󰂄 {capacity}%",
         "format-plugged": "󰂄 {capacity}%",
         "tooltip-format": "{timeTo}"
+    },
+
+    // Modo de energia do notebook (Fn+Q). Some no desktop (texto vazio). O serviço
+    // power-mode.service manda o sinal 14 a cada troca, inclusive pelo Fn+Q.
+    "custom/power-mode": {
+        "exec": "~/.config/hypr/scripts/power-mode.sh status",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 14,
+        "on-click": "~/.config/hypr/scripts/power-mode.sh cycle"
     },
 
     "pulseaudio": {

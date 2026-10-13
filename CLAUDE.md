@@ -90,7 +90,12 @@ desktop de casa (LG UltraWide `desc:LG Electronics LG ULTRAWIDE` à esquerda/pri
 
 ## Teclado
 
-Físico é **ANSI/US** (não ABNT2). `conf/input.lua` usa `kb_layout = "us"`,
+**Notebook (IdeaPad 82QJ): o teclado interno é ABNT2.** `conf/input.lua` termina com um
+`hl.device({ name = "ite-tech.-inc.-ite-device(8910)-keyboard", kb_layout = "br" })` — só esse
+teclado vira `br`; o resto (desktop, teclado USB externo) segue o padrão abaixo. Nome do
+dispositivo: `hyprctl devices` (o `at-raw-set-2-keyboard` NÃO é o teclado interno).
+
+Desktop: físico é **ANSI/US** (não ABNT2). `conf/input.lua` usa `kb_layout = "us"`,
 `kb_variant = "intl"` (US Internacional com dead keys — igual ao ´ do ABNT2): `'`+vogal =
 acento agudo, `'`+c = ç, `~`+a/o/n = til, `^`+vogal = circunflexo, `` ` ``+vogal = crase,
 `"`+vogal = trema. `'` `"` `~` `^` `` ` `` literais: tecla + espaço. AltGr+, também dá ç.
@@ -108,6 +113,23 @@ acento agudo, `'`+c = ç, `~`+a/o/n = til, `^`+vogal = circunflexo, `` ` ``+voga
 - **Não testar teclado com uinput sintético neste ambiente** — os testes falharam (foco,
   timeout) e correm risco de deixar modificador preso (quebra Alt+Tab e digitação). Se
   acontecer: soltar os mods sintéticos ou relogar.
+
+## Modo de energia (Fn+Q do notebook)
+
+O Fn+Q (LED azul/branco/vermelho) é lido pelo kernel (`lenovo-wmi-gamezone`) como
+`/sys/firmware/acpi/platform_profile` (`low-power`/`balanced`/`performance`) e o
+`power-profiles-daemon` espelha como `power-saver`/`balanced`/`performance` (+ EPP do
+amd-pstate). Trocar por software = `powerprofilesctl set <modo>` (muda o LED também).
+- `hypr/scripts/power-mode.sh watch` (unidade `power-mode.service`) escuta o D-Bus
+  (`gdbus monitor`: PPD pro modo, UPower `OnBattery` pra tomada): a cada troca sinaliza a
+  waybar (`custom/power-mode`, sinal 14), notifica e, se entrou/saiu da economia, dá
+  `hyprctl reload`. Tirar da tomada -> economia; ligar -> equilibrado.
+- `conf/look.lua` lê o `platform_profile` ao carregar: em `low-power` desliga animações,
+  blur e sombras. Por isso o reload (o autostart usa `hyprland.start`, não roda de novo).
+- "Proteger bateria" (`conservation_mode` do `ideapad_acpi`, carga para em ~60%) é botão
+  MANUAL na central do swaync (`toggle.sh bat`) — o usuário viaja e quer bateria cheia.
+  Escrita exige `common/system/udev/rules.d/90-ideapad-conservation.rules` (grupo wheel).
+- Painel do note é 120 Hz fixo (sem 60 Hz em `availableModes`) — baixar refresh não é opção.
 
 ## Autostart é systemd de verdade (via UWSM)
 

@@ -1,0 +1,15 @@
+[Unit]
+Description=Modo de energia do notebook (Fn+Q): visual, waybar, aviso e tomada
+PartOf=graphical-session.target
+After=graphical-session.target power-profiles-daemon.service
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionPathExists=/sys/firmware/acpi/platform_profile
+
+[Service]
+Type=simple
+ExecStart=%h/.config/hypr/scripts/power-mode.sh watch
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

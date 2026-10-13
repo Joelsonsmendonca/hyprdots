@@ -1,0 +1,8 @@
+# Lenovo IdeaPad: deixa o grupo wheel ligar/desligar o "conservation mode" (para a
+# carga em ~60% pra poupar a bateria) sem sudo — botão "Proteger bateria" da central
+# do swaync (swaync/scripts/toggle.sh bat). Instalar:
+#   sudo cp common/system/udev/rules.d/*.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload && sudo udevadm trigger -s platform -c add
+ACTION=="add|bind", SUBSYSTEM=="platform", DRIVER=="ideapad_acpi", \
+  RUN+="/usr/bin/chgrp wheel /sys%p/conservation_mode", \
+  RUN+="/usr/bin/chmod g+w /sys%p/conservation_mode"
