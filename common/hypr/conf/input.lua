@@ -11,6 +11,8 @@ hl.config({
         --   `  então vogal  -> à              |  "  então vogal -> ä ë ü
         --   AltGr + ,       -> ç  (também funciona)
         -- Pra digitar ' " ~ ^ ` literais: a tecla + espaço.
+        -- Padrão (desktop / teclados externos). O teclado interno do notebook é
+        -- ABNT2 e sobrescreve isto com hl.device() no fim do arquivo.
         kb_layout  = "us",
         kb_variant = "intl",
         kb_model   = "",
@@ -40,3 +42,11 @@ hl.gesture({
 -- Config por dispositivo: https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/
 -- (nome do dispositivo em `hyprctl devices`)
 -- hl.device({ name = "<nome>", sensitivity = -0.5 })
+
+-- Teclado interno do notebook (Lenovo IdeaPad 82QJ): físico ABNT2. Só existe no
+-- notebook, então no desktop esta regra não pega nada.
+hl.device({
+    name       = "ite-tech.-inc.-ite-device(8910)-keyboard",
+    kb_layout  = "br",
+    kb_variant = "",
+})
